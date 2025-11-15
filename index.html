@@ -1,191 +1,181 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>WHOOP Lab Helper</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WHOOPSaigon Advanced Labs Helper</title>
 
 <style>
-  :root {
-    --bg: #ffffff;
-    --text-color: #000000;
-    --card-bg: #f5f5f5;
-    --divider: #e1e1e1;
-    --input-bg: #ffffff;
-    --accent: #00ccb4;
-  }
+    body {
+        margin: 0;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto;
+        background: #0b0b0c;
+        color: #fff;
+        transition: background 0.3s, color 0.3s;
+    }
 
-  body {
-    margin: 0;
-    padding: 0;
-    background: var(--bg);
-    color: var(--text-color);
-    font-family: -apple-system, BlinkMacSystemFont, "Inter", sans-serif;
-  }
+    body.light {
+        background: #f7f7f7;
+        color: #111;
+    }
 
-  .wrap {
-    max-width: 680px;
-    margin: auto;
-    padding: 20px 16px 100px;
-  }
+    .container {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 22px;
+    }
 
-  /* HEADER */
-  .header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 18px;
-  }
-  .title {
-    font-size: 22px;
-    font-weight: 700;
-  }
+    h1 {
+        font-size: 28px;
+        font-weight: 700;
+        margin-bottom: 10px;
+    }
 
-  /* THEME BUTTON */
-  #themeToggle {
-    width: 38px;
-    height: 38px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 10px;
-    cursor: pointer;
-    background: var(--card-bg);
-    border: 1px solid var(--divider);
-  }
-  #themeToggle svg {
-    width: 20px;
-    height: 20px;
-  }
+    .desc {
+        opacity: 0.8;
+        margin-bottom: 25px;
+        line-height: 1.4;
+    }
 
-  /* DESCRIPTION */
-  .desc {
-    font-size: 14px;
-    opacity: 0.8;
-    margin-bottom: 20px;
-    line-height: 1.45;
-  }
+    /* ───────── SEARCH BAR ───────── */
+    .search-box {
+        display: flex;
+        align-items: center;
+        background: #1a1a1d;
+        border-radius: 12px;
+        padding: 10px 14px;
+        margin-bottom: 20px;
+    }
+    body.light .search-box {
+        background: #ffffff;
+        border: 1px solid #ccc;
+    }
 
-  /* SEARCH */
-  #searchInput {
-    width: 100%;
-    padding: 12px 14px;
-    font-size: 15px;
-    box-sizing: border-box;
-    border-radius: 10px;
-    border: 1px solid var(--divider);
-    background: var(--input-bg);
-    color: var(--text-color);
-    margin-bottom: 18px;
-  }
+    .search-box input {
+        width: 100%;
+        background: transparent;
+        border: none;
+        color: inherit;
+        font-size: 16px;
+        outline: none;
+    }
+
+    /* ───────── THEME SWITCH ───────── */
+    .theme-toggle {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 30px;
+        cursor: pointer;
+        user-select: none;
+    }
+
+    .theme-toggle svg {
+        width: 22px;
+        height: 22px;
+    }
+
+    /* ───────── BIOMARKER CARD ───────── */
+    .card {
+        background: #141417;
+        border-radius: 12px;
+        padding: 16px;
+        margin-bottom: 16px;
+        transition: background 0.2s;
+    }
+    body.light .card {
+        background: #ffffff;
+        border: 1px solid #ddd;
+    }
+
+    .card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        cursor: pointer;
+        font-size: 17px;
+        font-weight: 600;
+    }
+
+    .hh-info {
+        margin-top: 16px;
+        padding: 14px;
+        border-radius: 10px;
+        background: #1c1c20;
+        line-height: 1.5;
+    }
+    body.light .hh-info {
+        background: #f0f0f0;
+    }
+
+    .input-row {
+        margin-top: 14px;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .input-row input {
+        padding: 10px;
+        background: #0f0f11;
+        color: #fff;
+        border-radius: 8px;
+        border: 1px solid #333;
+        font-size: 15px;
+    }
+    body.light .input-row input {
+        background: white;
+        color: black;
+        border: 1px solid #bbb;
+    }
+
+    .result-box {
+        margin-top: 12px;
+        font-weight: 600;
+        padding: 10px;
+        background: #0d2612;
+        border-radius: 8px;
+        color: #7dff9b;
+    }
+    body.light .result-box {
+        background: #d8ffe8;
+        color: #054a1a;
+    }
+
+    /* hidden body */
+    .card-body { display: none; }
+    .card-body.open { display: block; }
+
 </style>
-</head>
 
+</head>
 <body>
 
-<div class="wrap">
+<div class="container">
 
-  <!-- HEADER -->
-  <div class="header">
-    <div class="title">WHOOPSaigon Advanced Lab Helper</div>
-
-    <!-- Moon / Sun toggle -->
-    <div id="themeToggle">
-      <!-- default icon: moon -->
-      <svg id="themeIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-        <path stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-          d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
-      </svg>
+    <h1>WHOOPSaigon Advanced Labs Helper</h1>
+    <div class="desc">
+        Công cụ giúp bạn đổi đơn vị, tính toán, và tìm đúng tên chỉ số Hoà Hảo tương ứng với WHOOP.
     </div>
-  </div>
 
-  <!-- DESCRIPTION -->
-  <div class="desc">
-    Dùng công cụ này khi WHOOP không đọc được một số chỉ số từ xét nghiệm Hoà Hảo.
-    Tìm theo tên <b>WHOOP</b> (như trong app), mở rộng, nhập đúng giá trị Hoà Hảo,
-    và công cụ sẽ tự động chuyển đổi / tính toán sang giá trị WHOOP.
-  </div>
+    <!-- THEME SWITCH -->
+    <div class="theme-toggle" id="themeToggle">
+        <span id="themeIcon">🌙</span>
+        <span id="themeLabel">Dark</span>
+    </div>
 
-  <!-- SEARCH -->
-  <input 
-    id="searchInput" 
-    type="text" 
-    placeholder="Tìm theo tên WHOOP hoặc Hoà Hảo… (ví dụ: 'acid uric', 'uric acid')"
-  />
+    <!-- SEARCH / FILTER -->
+    <div class="search-box">
+        <input id="searchInput" type="text" placeholder="Tìm theo tên WHOOP hoặc Hoà Hảo…">
+    </div>
 
-  <!-- RESULTS LIST -->
-  <div id="listContainer"></div>
+    <!-- BIOMARKER LIST -->
+    <div id="biomarkerList"></div>
 
 </div>
 
-<!-- JS MODULE LOADER -->
-<script type="module">
-  import { pinned_list } from "./pinned.js";
-  import { biomarkers_list } from "./biomarkers.js";
-  import { initApp } from "./script.js";
-
-  const themeBtn = document.getElementById("themeToggle");
-  const themeLabel = document.createElement("div");
-  themeLabel.style.fontSize = "12px";
-  themeLabel.style.marginTop = "2px";
-  themeLabel.style.opacity = "0.8";
-  themeBtn.appendChild(themeLabel);
-
-  const icon = document.getElementById("themeIcon");
-  let mode = "dark"; // DEFAULT DARK
-
-  function setTheme(m) {
-    const root = document.documentElement;
-
-    if (m === "dark") {
-      root.style.setProperty("--bg", "#0f0f0f");
-      root.style.setProperty("--text-color", "#ffffff");
-      root.style.setProperty("--card-bg", "#1a1a1a");
-      root.style.setProperty("--divider", "#333333");
-      root.style.setProperty("--input-bg", "#111111");
-
-      icon.innerHTML = `
-        <circle cx="12" cy="12" r="5" stroke-width="2" stroke="currentColor"/>
-        <line x1="12" y1="1" x2="12" y2="3" stroke-width="2"/>
-        <line x1="12" y1="21" x2="12" y2="23" stroke-width="2"/>
-        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" stroke-width="2"/>
-        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" stroke-width="2"/>
-        <line x1="1" y1="12" x2="3" y2="12" stroke-width="2"/>
-        <line x1="21" y1="12" x2="23" y2="12" stroke-width="2"/>
-        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" stroke-width="2"/>
-        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" stroke-width="2"/>
-      `;
-      themeLabel.textContent = "Dark";
-
-    } else {
-      root.style.setProperty("--bg", "#ffffff");
-      root.style.setProperty("--text-color", "#000000");
-      root.style.setProperty("--card-bg", "#f5f5f5");
-      root.style.setProperty("--divider", "#dddddd");
-      root.style.setProperty("--input-bg", "#ffffff");
-
-      icon.innerHTML = `
-        <path stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-          d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
-      `;
-      themeLabel.textContent = "Light";
-    }
-  }
-
-  // Initialize theme
-  setTheme("dark");
-
-  themeBtn.onclick = () => {
-    mode = mode === "light" ? "dark" : "light";
-    setTheme(mode);
-  };
-
-  // Initialize app AFTER DOM loads
-  window.addEventListener("DOMContentLoaded", () => {
-    initApp(pinned_list, biomarkers_list);
-  });
-</script>
-
+<!-- MAIN SCRIPT -->
+<script type="module" src="./script.js"></script>
 
 </body>
 </html>
