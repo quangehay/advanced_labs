@@ -1,305 +1,215 @@
-// script.js — Rendering engine for WHOOP Lab Helper
-// Works with: pinned.js + biomarkers.js
+import { biomarkers } from "./biomarkers.js";
+import { pinned } from "./pinned.js";
 
-//------------------------------------------------------
-// Helpers
-//------------------------------------------------------
+// =============================
+// GLOBAL STATE
+// =============================
+const state = {
+    filter: "",
+    values: {} // stores all user inputs
+};
 
-// Normalize search input
+// =============================
+// THEME (default = dark)
+// =============================
+function applyTheme(isDark) {
+    document.body.classList.toggle("dark", isDark);
+    document.body.classList.toggle("light", !isDark);
+    document.getElementById("themeLabel").textContent = isDark ? "Dark" : "Light";
+}
+
+function initThemeToggle() {
+    const toggle = document.getElementById("themeToggle");
+    toggle.checked = true;
+    applyTheme(true);
+
+    toggle.addEventListener("change", () => {
+        applyTheme(toggle.checked);
+    });
+}
+
+// =============================
+// FILTER LOGIC
+// =============================
 function normalize(str) {
-  return str
-    .toLowerCase()
-    .normalize("NFD") // remove accents
-    .replace(/[\u0300-\u036f]/g, "")
-    .trim();
+    return str.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 }
 
-// Format number with WHOOP style
-function fmt(v) {
-  if (v === null || v === undefined || Number.isNaN(v)) return "";
-  return Number(v).toFixed(2).replace(/\.00$/, "");
+function applyFilter(list) {
+    if (!state.filter.trim()) return list;
+
+    const q = normalize(state.filter);
+
+    return list.filter(item =>
+        normalize(item.whoop).includes(q) ||
+        normalize(item.hh).includes(q)
+    );
 }
 
-//------------------------------------------------------
-// Compute biomarker value
-//------------------------------------------------------
+// =============================
+// SORT: pinned first
+// =============================
+function sortBiomarkers(list) {
+    return list.slice().sort((a, b) => {
+        const ai = pinned.indexOf(a.whoop);
+        const bi = pinned.indexOf(b.whoop);
 
-function computeValue(item, inputs) {
-  try {
-    if (item.source === "pinned") {
-      if (item.pix_formula === null) return null; // N/A biomarker
-      return item.pix_formula(inputs);
+        if (ai !== -1 && bi === -1) return -1;
+        if (bi !== -1 && ai === -1) return 1;
+
+        if (ai !== -1 && bi !== -1) return ai - bi;
+
+        return a.whoop.localeCompare(b.whoop);
+    });
+}
+
+// =============================
+// RENDER A SINGLE BIOMARKER CARD
+// =============================
+function renderCard(item) {
+    const card = document.createElement("div");
+    card.className = "card";
+
+    const isPinned = pinned.includes(item.whoop);
+
+    card.innerHTML = `
+        <div class="card-header ${isPinned ? "pinned" : ""}">
+            <div class="title">${item.whoop}</div>
+            <button class="toggle-btn">+</button>
+        </div>
+    `;
+
+    const body = document.createElement("div");
+    body.className = "card-body hidden";
+
+    // DIRECT — no input box
+    if (item.type === "direct") {
+        body.innerHTML = `
+            <div class="hh-line"><strong>Tên Hoà Hảo:</strong> ${item.hh}</div>
+            <div class="hh-line"><strong>Đơn vị:</strong> ${item.unit_in}</div>
+            <div class="info-green">Dùng đúng giá trị Hoà Hảo nhập vào WHOOP.</div>
+        `;
     }
 
-    // normal biomarkers
-    if (item.type === "direct") return inputs[item.whoop] || null;
+    // CONVERT — one input
+    if (item.type === "convert") {
+        body.innerHTML = `
+            <label class="input-label">
+                ${item.hh} (${item.unit_in})
+            </label>
+            <input class="input-box" type="number" data-key="${item.key}" placeholder="Nhập giá trị">
+            <div class="result-line">
+                <strong>Kết quả WHOOP:</strong>
+                <span id="res-${item.key}">__</span> ${item.unit_out}
+            </div>
+        `;
+    }
+
+    // CALC — multiple inputs & formula
+    if (item.type === "calc") {
+        body.innerHTML =
+            item.deps.map(d => `
+                <label class="input-label">${d.hh} (${d.unit_in})</label>
+                <input class="input-box" type="number" data-key="${d.key}" placeholder="Nhập ${d.hh}">
+            `).join("") +
+            `
+            <div class="result-line">
+                <strong>Kết quả WHOOP:</strong>
+                <span id="res-${item.key}">__</span> ${item.unit_out}
+            </div>
+            <div class="formula-box">${item.info || ""}</div>
+        `;
+    }
+
+    card.appendChild(body);
+
+    // TOGGLE UI
+    const toggle = card.querySelector(".toggle-btn");
+    toggle.addEventListener("click", () => {
+        body.classList.toggle("hidden");
+        toggle.textContent = body.classList.contains("hidden") ? "+" : "–";
+    });
+
+    return card;
+}
+
+// =============================
+// LIVE INPUT HANDLING
+// =============================
+function attachInputHandlers() {
+    document.querySelectorAll(".input-box").forEach(input => {
+        input.addEventListener("input", (e) => {
+            const key = e.target.dataset.key;
+            state.values[key] = parseFloat(e.target.value) || null;
+            updateOne(key);
+        });
+    });
+}
+
+// =============================
+// UPDATE A SINGLE RESULT
+// =============================
+function updateOne(key) {
+    const item = biomarkers.find(x => x.key === key);
+    if (!item) return;
+
+    let output = null;
 
     if (item.type === "convert") {
-      const val = inputs[item.whoop];
-      if (val === undefined || val === null || val === "") return null;
-      return item.formula(val);
+        const v = state.values[item.key];
+        if (v != null) output = item.convert(v);
     }
 
-    return null;
-  } catch (err) {
-    console.error("Compute error", item.whoop, err);
-    return null;
-  }
+    if (item.type === "calc") {
+        const deps = {};
+        let allFilled = true;
+
+        item.deps.forEach(d => {
+            if (state.values[d.key] == null) allFilled = false;
+            deps[d.key] = state.values[d.key];
+        });
+
+        if (allFilled) output = item.calc(deps);
+    }
+
+    const target = document.getElementById(`res-${key}`);
+    if (target) target.textContent = output ?? "__";
 }
 
-//------------------------------------------------------
-// Render ONE biomarker block
-//------------------------------------------------------
+// =============================
+// MAIN RENDER
+// =============================
+function render() {
+    const container = document.getElementById("biomarkerList");
+    container.innerHTML = "";
 
-function createBiomarkerElement(item, state, update) {
-  const id = normalize(item.whoop).replace(/\s+/g, "-");
+    const filtered = applyFilter(
+        sortBiomarkers(biomarkers)
+    );
 
-  const wrapper = document.createElement("div");
-  wrapper.className = "bm-item";
-  wrapper.style.margin = "14px 0";
-  wrapper.style.padding = "14px";
-  wrapper.style.borderRadius = "12px";
-  wrapper.style.background = "var(--card-bg)";
-  wrapper.style.border = "1px solid var(--divider)";
-
-  //--------------------------------------------------
-  // Header row
-  //--------------------------------------------------
-  const head = document.createElement("div");
-  head.style.display = "flex";
-  head.style.justifyContent = "space-between";
-  head.style.alignItems = "center";
-  head.style.cursor = "pointer";
-
-  const title = document.createElement("div");
-  title.textContent = item.whoop;
-  title.style.fontSize = "15px";
-  title.style.fontWeight = "600";
-
-  const toggle = document.createElement("div");
-  toggle.textContent = state.open ? "▾" : "▸";
-  toggle.style.fontSize = "16px";
-
-  head.appendChild(title);
-  head.appendChild(toggle);
-  wrapper.appendChild(head);
-
-  //--------------------------------------------------
-  // Body (collapsible)
-  //--------------------------------------------------
-  const body = document.createElement("div");
-  body.style.display = state.open ? "block" : "none";
-  body.style.marginTop = "12px";
-  body.style.paddingTop = "12px";
-  body.style.borderTop = "1px solid var(--divider)";
-
-  //----------------------------------------
-  // If pinned + input requirement
-  //----------------------------------------
-  if (item.source === "pinned") {
-    // Explanation block
-    const label = document.createElement("div");
-    label.innerHTML = `
-      <div style="font-size:13px; opacity:0.8; margin-bottom:6px;">
-        <b>Tên Hoà Hảo:</b> ${item.hh}
-      </div>
-      <div style="font-size:12px; opacity:0.7; margin-bottom:10px;">
-        ${item.explain}
-      </div>
-    `;
-    body.appendChild(label);
-
-    // Input boxes
-    const needInputs = item.inputs || [];
-    needInputs.forEach(inputName => {
-      const row = document.createElement("div");
-      row.style.marginBottom = "12px";
-
-      const lab = document.createElement("div");
-      lab.style.fontSize = "13px";
-      lab.style.marginBottom = "4px";
-      lab.textContent = inputName;
-
-      const inp = document.createElement("input");
-      inp.type = "number";
-      inp.value = state.inputs[inputName] ?? "";
-      inp.style.width = "100%";
-      inp.style.padding = "10px";
-      inp.style.borderRadius = "8px";
-      inp.style.border = "1px solid var(--divider)";
-      inp.style.background = "var(--input-bg)";
-      inp.style.color = "var(--text-color)";
-      inp.oninput = () => {
-        state.inputs[inputName] = inp.value === "" ? "" : Number(inp.value);
-        update();
-      };
-
-      row.appendChild(lab);
-      row.appendChild(inp);
-      body.appendChild(row);
+    filtered.forEach(item => {
+        container.appendChild(renderCard(item));
     });
 
-    // result output
-    const res = computeValue(item, state.inputs);
-    const out = document.createElement("div");
-    out.style.marginTop = "10px";
-    out.style.fontSize = "14px";
-    out.innerHTML = `
-      <b>Kết quả WHOOP:</b> ${res === null ? "" : fmt(res)} 
-      <span style="opacity:0.7">${item.unit_whoop || ""}</span>
-    `;
-    body.appendChild(out);
-  }
-
-  //----------------------------------------
-  // Non-pinned biomarkers
-  //----------------------------------------
-  if (item.source !== "pinned") {
-    const label = document.createElement("div");
-    label.innerHTML = `
-      <div style="font-size:13px; opacity:0.8; margin-bottom:6px;">
-        <b>Tên Hoà Hảo:</b> ${item.hh}
-      </div>
-    `;
-    body.appendChild(label);
-
-    const inp = document.createElement("input");
-    inp.type = "number";
-    inp.placeholder = `${item.unit_hh}`;
-    inp.value = state.inputs[item.whoop] ?? "";
-    inp.style.width = "100%";
-    inp.style.padding = "10px";
-    inp.style.borderRadius = "8px";
-    inp.style.border = "1px solid var(--divider)";
-    inp.style.background = "var(--input-bg)";
-    inp.style.color = "var(--text-color)";
-    inp.oninput = () => {
-      state.inputs[item.whoop] = inp.value === "" ? "" : Number(inp.value);
-      update();
-    };
-
-    body.appendChild(inp);
-
-    const val = computeValue(item, state.inputs);
-    const out = document.createElement("div");
-    out.style.marginTop = "10px";
-    out.style.fontSize = "14px";
-    out.innerHTML = `
-      <b>Kết quả WHOOP:</b> ${val === null ? "" : fmt(val)} 
-      <span style="opacity:0.7">${item.unit_whoop}</span>
-    `;
-    body.appendChild(out);
-  }
-
-  //--------------------------------------------------
-  // Toggle behavior
-  //--------------------------------------------------
-  head.onclick = () => {
-    state.open = !state.open;
-    body.style.display = state.open ? "block" : "none";
-    toggle.textContent = state.open ? "▾" : "▸";
-  };
-
-  wrapper.appendChild(body);
-  return wrapper;
+    attachInputHandlers();
 }
 
-//------------------------------------------------------
-// Main Init
-//------------------------------------------------------
+// =============================
+// SEARCH FILTER
+// =============================
+function initFilterBox() {
+    const box = document.getElementById("searchBox");
+    box.addEventListener("input", (e) => {
+        state.filter = e.target.value;
+        render();
+    });
+}
 
-export function initApp(pinned_list, biomarkers_list) {
-
-  //--------------------------------------------------
-  // THEMING
-  //--------------------------------------------------
-  const root = document.documentElement;
-  const themeToggle = document.getElementById("themeToggle");
-
-  function setTheme(mode) {
-    if (mode === "dark") {
-      root.style.setProperty("--bg", "#0f0f0f");
-      root.style.setProperty("--text-color", "#ffffff");
-      root.style.setProperty("--card-bg", "#1a1a1a");
-      root.style.setProperty("--divider", "#333");
-      root.style.setProperty("--input-bg", "#222");
-    } else {
-      root.style.setProperty("--bg", "#ffffff");
-      root.style.setProperty("--text-color", "#000000");
-      root.style.setProperty("--card-bg", "#f5f5f5");
-      root.style.setProperty("--divider", "#dddddd");
-      root.style.setProperty("--input-bg", "#fff");
-    }
-  }
-
-  let theme = "light";
-  themeToggle.onclick = () => {
-    theme = theme === "light" ? "dark" : "light";
-    setTheme(theme);
-  };
-  setTheme(theme);
-
-  //--------------------------------------------------
-  // MERGE BIOMARKERS
-  //--------------------------------------------------
-
-  const full = [
-    ...pinned_list.map(x => ({ ...x, source: "pinned" })),
-    ...biomarkers_list.map(x => ({ ...x, source: "normal" }))
-  ];
-
-  //--------------------------------------------------
-  // STATE
-  //--------------------------------------------------
-  const state = {
-    search: "",
-    inputs: {},
-    items: {} // per-biomarker expand state
-  };
-
-  full.forEach(item => {
-    state.items[item.whoop] = {
-      open: item.source === "pinned", // pinned = collapsed? You can adjust
-      inputs: {}
-    };
-  });
-
-  //--------------------------------------------------
-  // DOM References
-  //--------------------------------------------------
-  const listWrap = document.getElementById("listContainer");
-  const searchBox = document.getElementById("searchInput");
-
-  //--------------------------------------------------
-  // SEARCH HANDLER
-  //--------------------------------------------------
-  searchBox.oninput = () => {
-    state.search = normalize(searchBox.value);
+// =============================
+// INIT
+// =============================
+window.addEventListener("DOMContentLoaded", () => {
+    initThemeToggle();
+    initFilterBox();
     render();
-  };
-
-  //--------------------------------------------------
-  // RENDER LOOP
-  //--------------------------------------------------
-  function render() {
-    listWrap.innerHTML = "";
-
-    const query = state.search;
-    const items = full.filter(item => {
-      if (!query) return true;
-      const hay = normalize(item.whoop + " " + item.hh);
-      return query.split(" ").every(k => hay.includes(k));
-    });
-
-    items.forEach(item => {
-      const el = createBiomarkerElement(
-        item,
-        state.items[item.whoop],
-        render
-      );
-      listWrap.appendChild(el);
-    });
-  }
-
-  render();
-}
+});
