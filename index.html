@@ -124,10 +124,15 @@
   import { biomarkers_list } from "./biomarkers.js";
   import { initApp } from "./script.js";
 
-  // Theme toggling with SVG icon swap
   const themeBtn = document.getElementById("themeToggle");
+  const themeLabel = document.createElement("div");
+  themeLabel.style.fontSize = "12px";
+  themeLabel.style.marginTop = "2px";
+  themeLabel.style.opacity = "0.8";
+  themeBtn.appendChild(themeLabel);
+
   const icon = document.getElementById("themeIcon");
-  let mode = "light";
+  let mode = "dark"; // DEFAULT DARK
 
   function setTheme(m) {
     const root = document.documentElement;
@@ -139,7 +144,6 @@
       root.style.setProperty("--divider", "#333333");
       root.style.setProperty("--input-bg", "#111111");
 
-      // Sun icon
       icon.innerHTML = `
         <circle cx="12" cy="12" r="5" stroke-width="2" stroke="currentColor"/>
         <line x1="12" y1="1" x2="12" y2="3" stroke-width="2"/>
@@ -151,6 +155,8 @@
         <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" stroke-width="2"/>
         <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" stroke-width="2"/>
       `;
+      themeLabel.textContent = "Dark";
+
     } else {
       root.style.setProperty("--bg", "#ffffff");
       root.style.setProperty("--text-color", "#000000");
@@ -158,26 +164,28 @@
       root.style.setProperty("--divider", "#dddddd");
       root.style.setProperty("--input-bg", "#ffffff");
 
-      // Moon icon
       icon.innerHTML = `
         <path stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
           d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
       `;
+      themeLabel.textContent = "Light";
     }
   }
 
-  setTheme("light");
+  // Initialize theme
+  setTheme("dark");
 
   themeBtn.onclick = () => {
     mode = mode === "light" ? "dark" : "light";
     setTheme(mode);
   };
 
-  // Initialize app
+  // Initialize app AFTER DOM loads
   window.addEventListener("DOMContentLoaded", () => {
     initApp(pinned_list, biomarkers_list);
   });
 </script>
+
 
 </body>
 </html>
