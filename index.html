@@ -1,181 +1,211 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="vi" data-theme="dark">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>WHOOP Saigon Advanced Labs Helper</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>WHOOP → Hoà Hảo Conversion Helper</title>
 
-<style>
-    body {
-        margin: 0;
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto;
-        background: #0b0b0c;
-        color: #fff;
-        transition: background 0.3s, color 0.3s;
-    }
+    <style>
+        /* ---------- RESET ---------- */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
-    body.light {
-        background: #f7f7f7;
-        color: #111;
-    }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Inter", sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            padding: 20px;
+            max-width: 900px;
+            margin: auto;
+        }
 
-    .container {
-        max-width: 900px;
-        margin: 0 auto;
-        padding: 22px;
-    }
+        /* ---------- THEME ---------- */
+        html[data-theme="dark"] {
+            --bg: #0d0d0d;
+            --card: #1a1a1a;
+            --border: #333;
+            --text: #f5f5f5;
+            --subtext: #bbbbbb;
+            --accent: #5ac8fa;
+        }
 
-    h1 {
-        font-size: 28px;
-        font-weight: 700;
-        margin-bottom: 10px;
-    }
+        html[data-theme="light"] {
+            --bg: #ffffff;
+            --card: #fafafa;
+            --border: #ddd;
+            --text: #222;
+            --subtext: #555;
+            --accent: #007aff;
+        }
 
-    .desc {
-        opacity: 0.8;
-        margin-bottom: 25px;
-        line-height: 1.4;
-    }
+        /* ---------- HEADER ---------- */
+        .header {
+            margin-bottom: 25px;
+        }
 
-    /* ───────── SEARCH BAR ───────── */
-    .search-box {
-        display: flex;
-        align-items: center;
-        background: #1a1a1d;
-        border-radius: 12px;
-        padding: 10px 14px;
-        margin-bottom: 20px;
-    }
-    body.light .search-box {
-        background: #ffffff;
-        border: 1px solid #ccc;
-    }
+        h1 {
+            font-size: 24px;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
 
-    .search-box input {
-        width: 100%;
-        background: transparent;
-        border: none;
-        color: inherit;
-        font-size: 16px;
-        outline: none;
-    }
+        .desc {
+            color: var(--subtext);
+            font-size: 14px;
+            line-height: 1.4;
+            margin-bottom: 20px;
+        }
 
-    /* ───────── THEME SWITCH ───────── */
-    .theme-toggle {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        margin-bottom: 30px;
-        cursor: pointer;
-        user-select: none;
-    }
+        /* ---------- THEME TOGGLE ---------- */
+        .theme-toggle {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            margin-bottom: 20px;
+            user-select: none;
+        }
 
-    .theme-toggle svg {
-        width: 22px;
-        height: 22px;
-    }
+        .theme-toggle svg {
+            width: 20px; height: 20px;
+            fill: var(--text);
+        }
 
-    /* ───────── BIOMARKER CARD ───────── */
-    .card {
-        background: #141417;
-        border-radius: 12px;
-        padding: 16px;
-        margin-bottom: 16px;
-        transition: background 0.2s;
-    }
-    body.light .card {
-        background: #ffffff;
-        border: 1px solid #ddd;
-    }
+        /* ---------- SEARCH ---------- */
+        #searchBox {
+            width: 100%;
+            padding: 12px 16px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            background: var(--card);
+            font-size: 16px;
+            color: var(--text);
+            margin-bottom: 25px;
+        }
 
-    .card-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        cursor: pointer;
-        font-size: 17px;
-        font-weight: 600;
-    }
+        #searchBox:focus {
+            outline: 2px solid var(--accent);
+        }
 
-    .hh-info {
-        margin-top: 16px;
-        padding: 14px;
-        border-radius: 10px;
-        background: #1c1c20;
-        line-height: 1.5;
-    }
-    body.light .hh-info {
-        background: #f0f0f0;
-    }
+        /* ---------- BIOMARKER BLOCK ---------- */
+        .biomarker-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            padding: 15px 18px;
+            border-radius: 12px;
+            margin-bottom: 14px;
+        }
 
-    .input-row {
-        margin-top: 14px;
-        display: flex;
-        flex-direction: column;
-        gap: 6px;
-    }
+        .bio-header {
+            display: flex;
+            justify-content: space-between;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+        }
 
-    .input-row input {
-        padding: 10px;
-        background: #0f0f11;
-        color: #fff;
-        border-radius: 8px;
-        border: 1px solid #333;
-        font-size: 15px;
-    }
-    body.light .input-row input {
-        background: white;
-        color: black;
-        border: 1px solid #bbb;
-    }
+        .bio-header span {
+            max-width: 90%;
+        }
 
-    .result-box {
-        margin-top: 12px;
-        font-weight: 600;
-        padding: 10px;
-        background: #0d2612;
-        border-radius: 8px;
-        color: #7dff9b;
-    }
-    body.light .result-box {
-        background: #d8ffe8;
-        color: #054a1a;
-    }
+        .bio-body {
+            margin-top: 14px;
+            display: none;
+        }
 
-    /* hidden body */
-    .card-body { display: none; }
-    .card-body.open { display: block; }
+        .input-row {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
 
-</style>
+        .input-row input {
+            flex: 1;
+            padding: 10px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            background: var(--bg);
+            color: var(--text);
+            font-size: 15px;
+            text-align: center;
+        }
 
+        .input-row div.unit {
+            padding: 10px;
+            font-size: 13px;
+            color: var(--subtext);
+            width: 70px;
+            text-align: center;
+        }
+
+        .label {
+            font-size: 13px;
+            color: var(--subtext);
+            margin-bottom: 8px;
+        }
+
+        .result-box {
+            background: var(--bg);
+            padding: 12px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            margin-top: 10px;
+            font-size: 15px;
+        }
+
+        .copy-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        button.copy-btn {
+            flex: 1;
+            padding: 10px;
+            background: var(--accent);
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        button.copy-btn:disabled {
+            background: #666;
+            cursor: not-allowed;
+        }
+
+        .explain {
+            font-size: 12px;
+            color: var(--subtext);
+            margin-top: 6px;
+        }
+    </style>
 </head>
+
 <body>
+    <div class="header">
+        <h1>WHOOP → Hoà Hảo Conversion Tool</h1>
+        <div class="desc">
+            Nhập các giá trị từ xét nghiệm Hoà Hảo để xem cách điền đúng vào ứng dụng WHOOP.
+            Hỗ trợ đổi định dạng số (US ↔ VN), công thức tính, và copy nhanh.
+        </div>
 
-<div class="container">
+        <!-- Theme toggle -->
+        <div class="theme-toggle" id="themeToggle">
+            <svg id="themeIcon" viewBox="0 0 24 24">
+                <path d="M12 3.1A1 1 0 0 1 13 4v2a1 1 0 0 1-2 0V4a1 1 0 0 1 1-1zM12 18a1 1 0 0 1 1 1v2a1 1 0 1 1-2 0v-2a1 1 0 0 1 1-1zM4 11a1 1 0 0 1 1 1 1 1 0 0 1-1 1H2a1 1 0 0 1 0-2h2zm18 0a1 1 0 1 1 0 2h-2a1 1 0 0 1 0-2h2zM5.6 5.6A1 1 0 0 1 7 7L5.5 8.5a1 1 0 1 1-1.4-1.4L5.6 5.6zm12.8 12.8A1 1 0 0 1 18 19l-1.5-1.5a1 1 0 1 1 1.4-1.4L19.4 18.4zM5.6 18.4 7 17a1 1 0 0 1 1.4 1.4L7 19.4A1 1 0 1 1 5.6 18.4zm12.8-12.8L17 7a1 1 0 0 1-1.4-1.4L17 4.6A1 1 0 1 1 18.4 5.6z"/>
+            </svg>
+            <span id="themeLabel">Dark</span>
+        </div>
 
-    <h1>WHOOP Saigon Advanced Labs Helper</h1>
-    <div class="desc">
-        Công cụ giúp bạn đổi đơn vị, tính toán, và tìm đúng tên chỉ số Hoà Hảo tương ứng với WHOOP.
+        <!-- Filter -->
+        <input id="searchBox" type="text" placeholder="Lọc theo tên WHOOP hoặc Hoà Hảo..." />
     </div>
 
-    <!-- THEME SWITCH -->
-    <div class="theme-toggle" id="themeToggle">
-        <span id="themeIcon">🌙</span>
-        <span id="themeLabel">Dark</span>
-    </div>
+    <div id="biomarkerContainer"></div>
 
-    <!-- SEARCH / FILTER -->
-    <div class="search-box">
-        <input id="searchInput" type="text" placeholder="Tìm theo tên WHOOP hoặc Hoà Hảo…">
-    </div>
-
-    <!-- BIOMARKER LIST -->
-    <div id="biomarkerList"></div>
-
-</div>
-
-<!-- MAIN SCRIPT -->
-<script type="module" src="./script.js"></script>
-
+    <script type="module" src="pinned.js"></script>
+    <script type="module" src="biomarkers.js"></script>
+    <script type="module" src="script.js"></script>
 </body>
 </html>
