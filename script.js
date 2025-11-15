@@ -1,215 +1,240 @@
-import { biomarkers } from "./biomarkers.js";
-import { pinned } from "./pinned.js";
+/* ============================================================
+   WHOOP x Hoà Hảo Conversion Tool
+   Author: ChatGPT
+   Logic strictly follows user requirements:
+   - Direct match biomarkers: Input box ONLY for number-format conversion.
+   - Converted biomarkers: Use correct input boxes and auto-calc rules.
+   - Show US + VN format always.
+   - Provide copy buttons.
+   ============================================================ */
 
-// =============================
-// GLOBAL STATE
-// =============================
-const state = {
-    filter: "",
-    values: {} // stores all user inputs
-};
+// ----------- GLOBAL UTILITIES --------------------------------
 
-// =============================
-// THEME (default = dark)
-// =============================
-function applyTheme(isDark) {
-    document.body.classList.toggle("dark", isDark);
-    document.body.classList.toggle("light", !isDark);
-    document.getElementById("themeLabel").textContent = isDark ? "Dark" : "Light";
-}
-
-function initThemeToggle() {
-    const toggle = document.getElementById("themeToggle");
-    toggle.checked = true;
-    applyTheme(true);
-
-    toggle.addEventListener("change", () => {
-        applyTheme(toggle.checked);
+function formatUS(x) {
+    if (x === "" || isNaN(x)) return "";
+    return Number(x).toLocaleString("en-US", {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 6
     });
 }
 
-// =============================
-// FILTER LOGIC
-// =============================
-function normalize(str) {
-    return str.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-}
-
-function applyFilter(list) {
-    if (!state.filter.trim()) return list;
-
-    const q = normalize(state.filter);
-
-    return list.filter(item =>
-        normalize(item.whoop).includes(q) ||
-        normalize(item.hh).includes(q)
-    );
-}
-
-// =============================
-// SORT: pinned first
-// =============================
-function sortBiomarkers(list) {
-    return list.slice().sort((a, b) => {
-        const ai = pinned.indexOf(a.whoop);
-        const bi = pinned.indexOf(b.whoop);
-
-        if (ai !== -1 && bi === -1) return -1;
-        if (bi !== -1 && ai === -1) return 1;
-
-        if (ai !== -1 && bi !== -1) return ai - bi;
-
-        return a.whoop.localeCompare(b.whoop);
+function formatVN(x) {
+    if (x === "" || isNaN(x)) return "";
+    return Number(x).toLocaleString("de-DE", {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 6
     });
 }
 
-// =============================
-// RENDER A SINGLE BIOMARKER CARD
-// =============================
-function renderCard(item) {
-    const card = document.createElement("div");
-    card.className = "card";
-
-    const isPinned = pinned.includes(item.whoop);
-
-    card.innerHTML = `
-        <div class="card-header ${isPinned ? "pinned" : ""}">
-            <div class="title">${item.whoop}</div>
-            <button class="toggle-btn">+</button>
-        </div>
-    `;
-
-    const body = document.createElement("div");
-    body.className = "card-body hidden";
-
-    // DIRECT — no input box
-    if (item.type === "direct") {
-        body.innerHTML = `
-            <div class="hh-line"><strong>Tên Hoà Hảo:</strong> ${item.hh}</div>
-            <div class="hh-line"><strong>Đơn vị:</strong> ${item.unit_in}</div>
-            <div class="info-green">Dùng đúng giá trị Hoà Hảo nhập vào WHOOP.</div>
-        `;
-    }
-
-    // CONVERT — one input
-    if (item.type === "convert") {
-        body.innerHTML = `
-            <label class="input-label">
-                ${item.hh} (${item.unit_in})
-            </label>
-            <input class="input-box" type="number" data-key="${item.key}" placeholder="Nhập giá trị">
-            <div class="result-line">
-                <strong>Kết quả WHOOP:</strong>
-                <span id="res-${item.key}">__</span> ${item.unit_out}
-            </div>
-        `;
-    }
-
-    // CALC — multiple inputs & formula
-    if (item.type === "calc") {
-        body.innerHTML =
-            item.deps.map(d => `
-                <label class="input-label">${d.hh} (${d.unit_in})</label>
-                <input class="input-box" type="number" data-key="${d.key}" placeholder="Nhập ${d.hh}">
-            `).join("") +
-            `
-            <div class="result-line">
-                <strong>Kết quả WHOOP:</strong>
-                <span id="res-${item.key}">__</span> ${item.unit_out}
-            </div>
-            <div class="formula-box">${item.info || ""}</div>
-        `;
-    }
-
-    card.appendChild(body);
-
-    // TOGGLE UI
-    const toggle = card.querySelector(".toggle-btn");
-    toggle.addEventListener("click", () => {
-        body.classList.toggle("hidden");
-        toggle.textContent = body.classList.contains("hidden") ? "+" : "–";
-    });
-
-    return card;
+function copyToClipboard(text) {
+    navigator.clipboard.writeText(text);
 }
 
-// =============================
-// LIVE INPUT HANDLING
-// =============================
-function attachInputHandlers() {
-    document.querySelectorAll(".input-box").forEach(input => {
-        input.addEventListener("input", (e) => {
-            const key = e.target.dataset.key;
-            state.values[key] = parseFloat(e.target.value) || null;
-            updateOne(key);
+// ---------------------------------------------------------------
+// Render UI
+// ---------------------------------------------------------------
+
+document.addEventListener("DOMContentLoaded", () => {
+    const container = document.getElementById("biomarker-list");
+    const searchBox = document.getElementById("searchBox");
+    const themeToggle = document.getElementById("themeToggle");
+
+    document.documentElement.classList.add("dark");
+
+    themeToggle.addEventListener("click", () => {
+        document.documentElement.classList.toggle("dark");
+        themeToggle.innerText =
+            document.documentElement.classList.contains("dark") ? "Light" : "Dark";
+    });
+
+    // ----------------- RENDER ALL MARKERS ---------------------
+
+    let allMarkers = [...PINNED_MARKERS, ...OTHER_MARKERS];
+
+    function render() {
+        container.innerHTML = "";
+
+        const keyword = searchBox.value.trim().toLowerCase();
+
+        allMarkers.forEach((bm) => {
+            const searchable =
+                `${bm.whoopName} ${bm.hoaHaoName || ""}`.toLowerCase();
+
+            if (!searchable.includes(keyword)) return;
+
+            const block = document.createElement("div");
+            block.className =
+                "biomarker-block border border-gray-700 dark:border-gray-500 p-4 rounded-xl mb-3";
+
+            block.innerHTML = `
+                <div class="header flex justify-between items-center">
+                    <div class="font-semibold text-lg">${bm.whoopName}</div>
+                    <button class="toggle-btn px-3 py-1 bg-gray-700 text-white rounded">
+                        ▼
+                    </button>
+                </div>
+
+                <div class="body hidden mt-3 pl-2">
+                    ${renderBody(bm)}
+                </div>
+            `;
+
+            const btn = block.querySelector(".toggle-btn");
+            const body = block.querySelector(".body");
+            btn.addEventListener("click", () => {
+                body.classList.toggle("hidden");
+            });
+
+            container.appendChild(block);
         });
-    });
-}
-
-// =============================
-// UPDATE A SINGLE RESULT
-// =============================
-function updateOne(key) {
-    const item = biomarkers.find(x => x.key === key);
-    if (!item) return;
-
-    let output = null;
-
-    if (item.type === "convert") {
-        const v = state.values[item.key];
-        if (v != null) output = item.convert(v);
     }
 
-    if (item.type === "calc") {
-        const deps = {};
-        let allFilled = true;
+    // ----------------- BODY BUILDER --------------------------
 
-        item.deps.forEach(d => {
-            if (state.values[d.key] == null) allFilled = false;
-            deps[d.key] = state.values[d.key];
-        });
+    function renderBody(bm) {
+        // A) Direct Match (unit preserved, value same)
+        if (bm.type === "direct") {
+            return `
+                <div class="mb-2 text-sm opacity-80">
+                    Tên trong Hoà Hảo: <b>${bm.hoaHaoName}</b> (${bm.hoaHaoUnit})
+                </div>
 
-        if (allFilled) output = item.calc(deps);
+                <div class="mb-1 text-sm opacity-75">
+                    Dùng ô này để chuyển định dạng số trước khi nhập vào WHOOP.
+                </div>
+
+                <input type="text"
+                    class="fmtInput w-full p-2 rounded bg-gray-800 text-white"
+                    placeholder="Nhập giá trị Hoà Hảo (VD: 40.83)"
+                />
+
+                <button class="convertBtn mt-2 px-3 py-1 bg-blue-600 rounded text-white">
+                    Đổi
+                </button>
+
+                <div class="resultArea mt-3 text-sm hidden">
+                    <div>US format: <span class="usVal font-semibold"></span>
+                        <button class="copyUS ml-2 px-2 py-1 bg-gray-600 rounded">copy</button>
+                    </div>
+
+                    <div class="mt-2">VN format: <span class="vnVal font-semibold"></span>
+                        <button class="copyVN ml-2 px-2 py-1 bg-gray-600 rounded">copy</button>
+                    </div>
+                </div>
+
+                <div class="text-xs mt-3 opacity-60">
+                    Một số trường hợp WHOOP yêu cầu dấu <b>,</b> thay vì dấu <b>.</b>.
+                    Dán số vào đây → bấm Đổi → sao chép định dạng phù hợp.
+                </div>
+            `;
+        }
+
+        // B) Conversion / Calculated
+        if (bm.type === "conversion") {
+            let inputHtml = "";
+            bm.inputs.forEach((inp, idx) => {
+                inputHtml += `
+                    <div class="mt-2">
+                        <div class="text-sm opacity-75 mb-1">${inp.label} (${inp.unit})</div>
+                        <input class="calcInput calc_${bm.id}_${idx}
+                               w-full p-2 rounded bg-gray-800 text-white"
+                               placeholder="Nhập ${inp.label}">
+                    </div>
+                `;
+            });
+
+            return `
+                ${inputHtml}
+
+                <div class="mt-4 text-sm">Kết quả:</div>
+
+                <div class="mt-1">US:
+                    <span class="calcUS font-semibold"></span>
+                    <button class="copyUS ml-2 px-2 py-1 bg-gray-600 rounded">copy</button>
+                </div>
+
+                <div class="mt-2">VN:
+                    <span class="calcVN font-semibold"></span>
+                    <button class="copyVN ml-2 px-2 py-1 bg-gray-600 rounded">copy</button>
+                </div>
+
+                <div class="text-xs mt-3 opacity-60">
+                    Công thức: ${bm.explanation}
+                </div>
+            `;
+        }
+
+        return `<div>Lỗi cấu hình biomarker</div>`;
     }
 
-    const target = document.getElementById(`res-${key}`);
-    if (target) target.textContent = output ?? "__";
-}
+    // ----------------------------------------------------------
 
-// =============================
-// MAIN RENDER
-// =============================
-function render() {
-    const container = document.getElementById("biomarkerList");
-    container.innerHTML = "";
+    // EVENT DELEGATION FOR ALL INPUTS
+    container.addEventListener("click", (e) => {
+        const block = e.target.closest(".biomarker-block");
+        if (!block) return;
 
-    const filtered = applyFilter(
-        sortBiomarkers(biomarkers)
-    );
+        // DIRECT MATCH – conversion
+        if (e.target.classList.contains("convertBtn")) {
+            const input = block.querySelector(".fmtInput");
+            const resultBox = block.querySelector(".resultArea");
+            const us = block.querySelector(".usVal");
+            const vn = block.querySelector(".vnVal");
 
-    filtered.forEach(item => {
-        container.appendChild(renderCard(item));
+            const raw = input.value.replace(",", "."); // normalize
+
+            if (raw === "" || isNaN(raw)) {
+                us.textContent = "";
+                vn.textContent = "";
+                resultBox.classList.remove("hidden");
+                return;
+            }
+
+            us.textContent = formatUS(raw);
+            vn.textContent = formatVN(raw);
+            resultBox.classList.remove("hidden");
+        }
+
+        // DIRECT MATCH — COPY
+        if (e.target.classList.contains("copyUS")) {
+            const val = block.querySelector(".usVal").textContent;
+            copyToClipboard(val);
+        }
+        if (e.target.classList.contains("copyVN")) {
+            const val = block.querySelector(".vnVal").textContent;
+            copyToClipboard(val);
+        }
+
+        // CONVERSION — real calculation
+        if (e.target.classList.contains("calcInput")) {
+            calc(block);
+        }
     });
 
-    attachInputHandlers();
-}
+    function calc(block) {
+        const title = block.querySelector(".header div").innerText;
+        const bm = [...PINNED_MARKERS, ...OTHER_MARKERS].find(
+            (x) => x.whoopName === title
+        );
+        if (!bm || bm.type !== "conversion") return;
 
-// =============================
-// SEARCH FILTER
-// =============================
-function initFilterBox() {
-    const box = document.getElementById("searchBox");
-    box.addEventListener("input", (e) => {
-        state.filter = e.target.value;
-        render();
-    });
-}
+        let values = [];
+        for (let i = 0; i < bm.inputs.length; i++) {
+            let v = block.querySelector(`.calc_${bm.id}_${i}`).value;
+            v = v.replace(",", "."); // normalize decimal
+            if (v === "" || isNaN(v)) return;
+            values.push(Number(v));
+        }
 
-// =============================
-// INIT
-// =============================
-window.addEventListener("DOMContentLoaded", () => {
-    initThemeToggle();
-    initFilterBox();
+        let result = bm.calc(...values);
+
+        block.querySelector(".calcUS").textContent = formatUS(result);
+        block.querySelector(".calcVN").textContent = formatVN(result);
+    }
+
+    // ----------------------------------------------------------
+
+    searchBox.addEventListener("input", render);
+
     render();
 });
