@@ -1,286 +1,99 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>WHOOP Lab Helper</title>
 
 <style>
-    :root {
-        --bg: #0e0f10;
-        --fg: #ffffff;
-        --card-bg: #181a1d;
-        --card-border: #242629;
-        --accent: #00d2d2;
-        --input-bg: #101215;
-        --input-border: #2c2f33;
-        --shadow: rgba(0,0,0,0.4);
-        --muted: #9ca3af;
-    }
+  :root {
+    --bg: #ffffff;
+    --text-color: #000000;
+    --card-bg: #f5f5f5;
+    --divider: #dddddd;
+    --input-bg: #ffffff;
+  }
 
-    html.light {
-        --bg: #f5f7f8;
-        --fg: #0d0f12;
-        --card-bg: #ffffff;
-        --card-border: #e6e8ea;
-        --input-bg: #f2f3f5;
-        --input-border: #d0d3d8;
-        --shadow: rgba(0,0,0,0.1);
-        --muted: #6b7280;
-    }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Inter", sans-serif;
+    background: var(--bg);
+    color: var(--text-color);
+  }
 
-    * {
-        box-sizing: border-box;
-    }
+  .wrap {
+    max-width: 640px;
+    margin: auto;
+    padding: 24px 16px 80px;
+  }
 
-    body {
-        background: var(--bg);
-        color: var(--fg);
-        font-family: -apple-system, BlinkMacSystemFont, "Inter", "Helvetica Neue", Arial, sans-serif;
-        margin: 0;
-        padding: 0;
-    }
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 22px;
+  }
 
-    .header {
-        padding: 22px 20px 14px 20px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        border-bottom: 1px solid var(--card-border);
-        position: sticky;
-        top: 0;
-        background: var(--bg);
-        z-index: 50;
-    }
+  .title {
+    font-size: 22px;
+    font-weight: 700;
+  }
 
-    .title {
-        font-size: 22px;
-        font-weight: 700;
-    }
+  #themeToggle {
+    padding: 8px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    background: var(--card-bg);
+    border: 1px solid var(--divider);
+  }
 
-    .theme-toggle {
-        background: none;
-        border: none;
-        color: var(--fg);
-        display: flex;
-        align-items: center;
-        gap: 6px;
-        cursor: pointer;
-        font-size: 16px;
-        opacity: 0.7;
-    }
-    .theme-toggle:hover { opacity: 1; }
-
-    /* SEARCH AREA (FULL REDESIGN) */
-    .search-area {
-        padding: 10px 16px 4px 16px;
-    }
-
-    .search-label-row {
-        display: flex;
-        justify-content: space-between;
-        align-items: baseline;
-        margin-bottom: 6px;
-    }
-
-    .search-label {
-        font-size: 13px;
-        font-weight: 500;
-        color: var(--muted);
-        text-transform: uppercase;
-        letter-spacing: 0.7px;
-    }
-
-    .search-hint {
-        font-size: 11px;
-        color: var(--muted);
-    }
-
-    .search-shell {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        padding: 8px 12px;
-        border-radius: 999px;
-        border: 1px solid var(--input-border);
-        background: var(--input-bg);
-        box-shadow: 0 3px 9px var(--shadow);
-    }
-
-    .search-icon {
-        font-size: 16px;
-        opacity: 0.7;
-    }
-
-    .search-input {
-        border: none;
-        outline: none;
-        background: transparent;
-        color: var(--fg);
-        font-size: 15px;
-        width: 100%;
-        padding: 6px 2px;
-    }
-
-    .search-input::placeholder {
-        color: var(--muted);
-    }
-
-    .card {
-        background: var(--card-bg);
-        margin: 10px 16px;
-        padding: 16px 18px;
-        border-radius: 16px;
-        border: 1px solid var(--card-border);
-        box-shadow: 0 4px 14px var(--shadow);
-        transition: all 0.2s ease;
-    }
-
-    .card-header {
-        font-weight: 600;
-        font-size: 16.5px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        cursor: pointer;
-    }
-
-    .arrow {
-        transition: transform 0.2s ease;
-        opacity: 0.7;
-        font-size: 18px;
-    }
-    .card.open .arrow {
-        transform: rotate(90deg);
-        opacity: 1;
-    }
-
-    .card-body {
-        margin-top: 10px;
-        padding-top: 12px;
-        border-top: 1px solid var(--card-border);
-        display: none;
-    }
-    .card.open .card-body {
-        display: block;
-    }
-
-    .field-label {
-        font-size: 14px;
-        opacity: 0.9;
-        margin-bottom: 4px;
-        font-weight: 500;
-    }
-
-    .field-sub {
-        font-size: 12px;
-        color: var(--muted);
-        margin-bottom: 8px;
-    }
-
-    .input-row {
-        display: flex;
-        gap: 8px;
-        align-items: center;
-        margin-bottom: 12px;
-    }
-
-    .input-box {
-        flex: 1;
-        padding: 10px 10px;
-        border-radius: 12px;
-        border: 1px solid var(--input-border);
-        background: var(--input-bg);
-        font-size: 15px;
-        color: var(--fg);
-        text-align: center;
-    }
-
-    .unit-tag {
-        min-width: 72px;
-        padding: 8px 9px;
-        font-size: 13px;
-        text-align: center;
-        border-radius: 999px;
-        border: 1px solid var(--input-border);
-        background: var(--input-bg);
-        color: var(--muted);
-    }
-
-    .result-line {
-        margin-top: 8px;
-        padding: 10px 11px;
-        font-size: 15px;
-        border-left: 3px solid var(--accent);
-        background: rgba(0, 210, 210, 0.08);
-        border-radius: 6px;
-    }
-
-    .muted-note {
-        font-size: 12px;
-        color: var(--muted);
-        margin-top: 4px;
-    }
+  /* Search Box */
+  #searchInput {
+    width: 100%;
+    padding: 12px 14px;
+    font-size: 15px;
+    border-radius: 10px;
+    border: 1px solid var(--divider);
+    margin-bottom: 20px;
+    background: var(--input-bg);
+    color: var(--text-color);
+    box-sizing: border-box;
+  }
 </style>
 </head>
 
 <body>
+  <div class="wrap">
 
-<div class="header">
-    <div class="title">WHOOP Lab Helper</div>
-    <button id="themeToggle" class="theme-toggle">
-        <span class="theme-toggle-icon">☾</span>
-        <span class="theme-toggle-label">Dark</span>
-    </button>
-</div>
+    <!-- HEADER -->
+    <div class="header">
+      <div class="title">WHOOP Lab Helper</div>
 
-<!-- NEW SEARCH AREA -->
-<div class="search-area">
-    <div class="search-label-row">
-        <div class="search-label">Tìm chỉ số WHOOP / Hoà Hảo</div>
-        <div class="search-hint">Ví dụ: “uric acid”, “acid uric”, “ALT”, “Ferritin”</div>
+      <!-- Toggle -->
+      <div id="themeToggle">WHOOP</div>
     </div>
-    <div class="search-shell">
-        <span class="search-icon">🔍</span>
-        <input
-            id="searchInput"
-            class="search-input"
-            type="text"
-            placeholder="Gõ tên chỉ số để lọc danh sách…"
-        />
-    </div>
-</div>
 
-<!-- ONE FLAT LIST; JS WILL INJECT EVERYTHING -->
-<div id="biomarkerList"></div>
+    <!-- SEARCH -->
+    <input 
+      id="searchInput"
+      type="text"
+      placeholder="Tìm theo tên WHOOP hoặc Hoà Hảo… (ví dụ: 'acid uric', 'uric acid')"
+    />
 
-<script>
-const toggleBtn = document.getElementById("themeToggle");
-const html = document.documentElement;
-const savedTheme = localStorage.getItem("theme");
+    <!-- LIST -->
+    <div id="listContainer"></div>
+  </div>
 
-if (savedTheme === "light") {
-  html.classList.add("light");
-  toggleBtn.querySelector(".theme-toggle-icon").textContent = "☀";
-  toggleBtn.querySelector(".theme-toggle-label").textContent = "Light";
-}
+  <!-- MODULE LOADER -->
+  <script type="module">
+    import { pinned_list } from "./pinned.js";
+    import { biomarkers_list } from "./biomarkers.js";
+    import { initApp } from "./script.js";
 
-toggleBtn.addEventListener("click", () => {
-  const isLight = html.classList.toggle("light");
-  if (isLight) {
-    toggleBtn.querySelector(".theme-toggle-icon").textContent = "☀";
-    toggleBtn.querySelector(".theme-toggle-label").textContent = "Light";
-    localStorage.setItem("theme", "light");
-  } else {
-    toggleBtn.querySelector(".theme-toggle-icon").textContent = "☾";
-    toggleBtn.querySelector(".theme-toggle-label").textContent = "Dark";
-    localStorage.setItem("theme", "dark");
-  }
-});
-</script>
-
-<script src="biomarkers.js"></script>
-<script src="script.js"></script>
-
+    window.addEventListener("DOMContentLoaded", () => {
+      initApp(pinned_list, biomarkers_list);
+    });
+  </script>
 </body>
 </html>
