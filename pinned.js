@@ -1,8 +1,8 @@
 // pinned.js
-// ES Module export
-// Biomarkers that appear at the TOP of the list (collapsed by default)
+// List of WHOOP biomarkers that must always appear first (collapsed)
+// Order exactly as requested by user.
 
-export const pinned = [
+export const pinnedBiomarkers = [
     "ALANINE AMINOTRANSFERASE (ALT)",
     "ALBUMIN/GLOBULIN RATIO",
     "BUN/CREATININE RATIO",
