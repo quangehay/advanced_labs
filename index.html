@@ -3,10 +3,9 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>WHOOP → Hoà Hảo Conversion Helper</title>
+    <title>WHOOP → Hoà Hảo Conversion Tool</title>
 
     <style>
-        /* ---------- RESET ---------- */
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
@@ -16,9 +15,9 @@
             padding: 20px;
             max-width: 900px;
             margin: auto;
+            position: relative;
         }
 
-        /* ---------- THEME ---------- */
         html[data-theme="dark"] {
             --bg: #0d0d0d;
             --card: #1a1a1a;
@@ -26,6 +25,9 @@
             --text: #f5f5f5;
             --subtext: #bbbbbb;
             --accent: #5ac8fa;
+            --line: #2a2a2a;
+            --result-green: #8dd8a0;
+            --result-green-dark: #4da066;
         }
 
         html[data-theme="light"] {
@@ -35,18 +37,34 @@
             --text: #222;
             --subtext: #555;
             --accent: #007aff;
+            --line: #eeeeee;
+            --result-green: #4ca46b;
+            --result-green-dark: #2d7b49;
         }
 
-        /* ---------- HEADER ---------- */
-        .header {
-            margin-bottom: 25px;
+        /* TOP RIGHT THEME BUTTON */
+        #themeButton {
+            position: fixed;
+            top: 16px;
+            right: 16px;
+            padding: 8px 14px;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            font-size: 13px;
+            color: var(--text);
+            cursor: pointer;
+            z-index: 999;
+            user-select: none;
+            transition: background 0.2s, border-color 0.2s;
         }
 
-        h1 {
-            font-size: 24px;
-            margin-bottom: 10px;
-            font-weight: 700;
+        #themeButton:hover {
+            background: var(--border);
         }
+
+        .header { margin-bottom: 25px; }
+        h1 { font-size: 24px; margin-bottom: 10px; font-weight: 700; }
 
         .desc {
             color: var(--subtext);
@@ -55,22 +73,6 @@
             margin-bottom: 20px;
         }
 
-        /* ---------- THEME TOGGLE ---------- */
-        .theme-toggle {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            cursor: pointer;
-            margin-bottom: 20px;
-            user-select: none;
-        }
-
-        .theme-toggle svg {
-            width: 20px; height: 20px;
-            fill: var(--text);
-        }
-
-        /* ---------- SEARCH ---------- */
         #searchBox {
             width: 100%;
             padding: 12px 16px;
@@ -82,11 +84,8 @@
             margin-bottom: 25px;
         }
 
-        #searchBox:focus {
-            outline: 2px solid var(--accent);
-        }
+        #searchBox:focus { outline: 2px solid var(--accent); }
 
-        /* ---------- BIOMARKER BLOCK ---------- */
         .biomarker-card {
             background: var(--card);
             border: 1px solid var(--border);
@@ -101,21 +100,23 @@
             cursor: pointer;
             font-size: 16px;
             font-weight: 600;
+            padding: 4px 0;
         }
 
-        .bio-header span {
-            max-width: 90%;
-        }
+        .bio-body { margin-top: 14px; display: none; }
 
-        .bio-body {
-            margin-top: 14px;
-            display: none;
+        /* LABEL (Tên Hoà Hảo) */
+        .label {
+            font-size: 14px;
+            color: var(--accent);
+            font-weight: 500;
+            margin-bottom: 6px;
         }
 
         .input-row {
             display: flex;
             gap: 8px;
-            margin-bottom: 10px;
+            margin-bottom: 14px;
         }
 
         .input-row input {
@@ -129,7 +130,7 @@
             text-align: center;
         }
 
-        .input-row div.unit {
+        .unit {
             padding: 10px;
             font-size: 13px;
             color: var(--subtext);
@@ -137,41 +138,70 @@
             text-align: center;
         }
 
-        .label {
-            font-size: 13px;
+        /* RESULT */
+        .result-section { margin-top: 18px; }
+
+        .result-title {
             color: var(--subtext);
-            margin-bottom: 8px;
-        }
-
-        .result-box {
-            background: var(--bg);
-            padding: 12px;
-            border-radius: 10px;
-            border: 1px solid var(--border);
-            margin-top: 10px;
             font-size: 15px;
-        }
-
-        .copy-buttons {
+            font-weight: 700;
+            letter-spacing: 2px;
+            margin: 18px 0 12px 0;
+            text-align: center;
             display: flex;
-            gap: 10px;
-            margin-top: 10px;
+            align-items: center;
+            gap: 12px;
         }
 
-        button.copy-btn {
+        .result-title::before,
+        .result-title::after {
+            content: "";
             flex: 1;
-            padding: 10px;
-            background: var(--accent);
-            border: none;
-            border-radius: 10px;
-            color: white;
-            font-weight: 600;
-            cursor: pointer;
+            height: 1px;
+            background: var(--line);
         }
 
-        button.copy-btn:disabled {
-            background: #666;
-            cursor: not-allowed;
+        .result-line {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 10px;
+        }
+
+        .result-num {
+            font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--result-green);
+        }
+
+        .copy-chip {
+            padding: 4px 10px;
+            border-radius: 10px;
+            cursor: pointer;
+            background: var(--border);
+            color: var(--text);
+            font-size: 13px;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            user-select: none;
+            transition: background 0.2s;
+        }
+
+        .copy-chip.copied {
+            background: var(--result-green-dark);
+            color: #fff;
+        }
+
+        .result-explain {
+            margin-top: 8px;
+            font-size: 12px;
+            color: var(--subtext);
+            text-align: center;
+            line-height: 1.35;
+            padding: 0 8px;
         }
 
         .explain {
@@ -183,22 +213,15 @@
 </head>
 
 <body>
+
+    <div id="themeButton">Bật đèn</div>
+
     <div class="header">
         <h1>WHOOP → Hoà Hảo Conversion Tool</h1>
         <div class="desc">
             Nhập các giá trị từ xét nghiệm Hoà Hảo để xem cách điền đúng vào ứng dụng WHOOP.
-            Hỗ trợ đổi định dạng số (US ↔ VN), công thức tính, và copy nhanh.
         </div>
 
-        <!-- Theme toggle -->
-        <div class="theme-toggle" id="themeToggle">
-            <svg id="themeIcon" viewBox="0 0 24 24">
-                <path d="M12 3.1A1 1 0 0 1 13 4v2a1 1 0 0 1-2 0V4a1 1 0 0 1 1-1zM12 18a1 1 0 0 1 1 1v2a1 1 0 1 1-2 0v-2a1 1 0 0 1 1-1zM4 11a1 1 0 0 1 1 1 1 1 0 0 1-1 1H2a1 1 0 0 1 0-2h2zm18 0a1 1 0 1 1 0 2h-2a1 1 0 0 1 0-2h2zM5.6 5.6A1 1 0 0 1 7 7L5.5 8.5a1 1 0 1 1-1.4-1.4L5.6 5.6zm12.8 12.8A1 1 0 0 1 18 19l-1.5-1.5a1 1 0 1 1 1.4-1.4L19.4 18.4zM5.6 18.4 7 17a1 1 0 0 1 1.4 1.4L7 19.4A1 1 0 1 1 5.6 18.4zm12.8-12.8L17 7a1 1 0 0 1-1.4-1.4L17 4.6A1 1 0 1 1 18.4 5.6z"/>
-            </svg>
-            <span id="themeLabel">Dark</span>
-        </div>
-
-        <!-- Filter -->
         <input id="searchBox" type="text" placeholder="Lọc theo tên WHOOP hoặc Hoà Hảo..." />
     </div>
 
