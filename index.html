@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>WHOOP → Hoà Hảo Conversion Tool</title>
+    <title>WHOOP Advanced Labs Helper</title>
 
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -42,7 +42,6 @@
             --result-green-dark: #2d7b49;
         }
 
-        /* TOP RIGHT THEME BUTTON */
         #themeButton {
             position: fixed;
             top: 16px;
@@ -59,9 +58,7 @@
             transition: background 0.2s, border-color 0.2s;
         }
 
-        #themeButton:hover {
-            background: var(--border);
-        }
+        #themeButton:hover { background: var(--border); }
 
         .header { margin-bottom: 25px; }
         h1 { font-size: 24px; margin-bottom: 10px; font-weight: 700; }
@@ -105,7 +102,6 @@
 
         .bio-body { margin-top: 14px; display: none; }
 
-        /* LABEL (Tên Hoà Hảo) */
         .label {
             font-size: 14px;
             color: var(--accent);
@@ -138,7 +134,6 @@
             text-align: center;
         }
 
-        /* RESULT */
         .result-section { margin-top: 18px; }
 
         .result-title {
@@ -217,9 +212,10 @@
     <div id="themeButton">Bật đèn</div>
 
     <div class="header">
-        <h1>WHOOP → Hoà Hảo Conversion Tool</h1>
+        <h1>WHOOP Advanced Labs Helper</h1>
         <div class="desc">
-            Nhập các giá trị từ xét nghiệm Hoà Hảo để xem cách điền đúng vào ứng dụng WHOOP.
+            Chuyển đổi và chuẩn hóa toàn bộ chỉ số xét nghiệm Hoà Hảo sang định dạng WHOOP. 
+            Hỗ trợ đổi đơn vị, tính toán tự động, và copy nhanh giá trị theo đúng cách WHOOP yêu cầu.
         </div>
 
         <input id="searchBox" type="text" placeholder="Lọc theo tên WHOOP hoặc Hoà Hảo..." />
@@ -227,8 +223,10 @@
 
     <div id="biomarkerContainer"></div>
 
-    <script type="module" src="pinned.js"></script>
-    <script type="module" src="biomarkers.js"></script>
-    <script type="module" src="script.js"></script>
+    <!-- MUST use relative paths for GitHub Pages -->
+    <script type="module" src="./pinned.js"></script>
+    <script type="module" src="./biomarkers.js"></script>
+    <script type="module" src="./script.js"></script>
+
 </body>
 </html>
