@@ -1,262 +1,645 @@
-export const biomarkers = [
+// biomarkers.js
+// Full WHOOP biomarker dataset using:
+// - WHOOP name (whoop)
+// - Internal key (key)
+// - ONE Hoa Hao input (Option 2)
+// - Unified calculation architecture
+// - Correct NON-HDL mg/dL logic
+// - No thousand separators for VN/US formats
 
-  // 1 — ALT
-  {
-    whoopName: "ALANINE AMINOTRANSFERASE (ALT)",
-    hoaHaoName: "SGPT (ALT)",
-    hoaHaoUnit: "U/L",
-    whoopUnit: "U/L",
-    type: "direct",
-    formulaJS: null,
-    explanation: "Hoà Hảo và WHOOP cùng đơn vị. Nhập đúng số từ Hoà Hảo vào WHOOP."
+export const BIOMARKERS = [
+
+/* ============================================================================
+   DIRECT MATCH (HH unit = WHOOP unit)
+============================================================================ */
+{
+  whoop: "ALANINE AMINOTRANSFERASE (ALT)",
+  key: "alt",
+  type: "direct",
+  hhName: "SGPT (ALT)",
+  hhUnit: "U/L",
+  whoopUnit: "U/L",
+  convert: v => v
+},
+
+{
+  whoop: "ALBUMIN",
+  key: "albumin",
+  type: "direct",
+  hhName: "Albumin",
+  hhUnit: "g/dL",
+  whoopUnit: "g/dL",
+  convert: v => v
+},
+
+{
+  whoop: "ALKALINE PHOSPHATASE (ALP)",
+  key: "alp",
+  type: "direct",
+  hhName: "Alk Phosphatase",
+  hhUnit: "U/L",
+  whoopUnit: "U/L",
+  convert: v => v
+},
+
+{
+  whoop: "APOLIPOPROTEIN B (APOB)",
+  key: "apob",
+  type: "direct",
+  hhName: "LIPOPROTEIN APO-B",
+  hhUnit: "mg/dL",
+  whoopUnit: "mg/dL",
+  convert: v => v
+},
+
+{
+  whoop: "ASPARTATE AMINOTRANSFERASE (AST)",
+  key: "ast",
+  type: "direct",
+  hhName: "SGOT (AST)",
+  hhUnit: "U/L",
+  whoopUnit: "U/L",
+  convert: v => v
+},
+
+{
+  whoop: "BASOPHIL %",
+  key: "baso_pct",
+  type: "direct",
+  hhName: "% Baso",
+  hhUnit: "%",
+  whoopUnit: "%",
+  convert: v => v
+},
+
+{
+  whoop: "BLOOD UREA NITROGEN",
+  key: "bun",
+  type: "direct",
+  hhName: "BUN",
+  hhUnit: "mg/dL",
+  whoopUnit: "mg/dL",
+  convert: v => v
+},
+
+{
+  whoop: "CHLORIDE",
+  key: "chloride",
+  type: "direct",
+  hhName: "Cl",
+  hhUnit: "mmol/L",
+  whoopUnit: "mmol/L",
+  convert: v => v
+},
+
+{
+  whoop: "CORTISOL",
+  key: "cortisol",
+  type: "direct",
+  hhName: "Cortisol/Blood/Morning (μg/dL)",
+  hhUnit: "μg/dL",
+  whoopUnit: "mcg/dL",
+  convert: v => v
+},
+
+{
+  whoop: "CREATININE",
+  key: "creatinine",
+  type: "direct",
+  hhName: "Creatinin/Serum",
+  hhUnit: "mg/dL",
+  whoopUnit: "mg/dL",
+  convert: v => v
+},
+
+{
+  whoop: "EOSINOPHIL %",
+  key: "eos_pct",
+  type: "direct",
+  hhName: "% Eos",
+  hhUnit: "%",
+  whoopUnit: "%",
+  convert: v => v
+},
+
+{
+  whoop: "ESTIMATED GLOMERULAR FILTRATION RATE (EGFR)",
+  key: "egfr",
+  type: "direct",
+  hhName: "eGFR (CKD-EPI)",
+  hhUnit: "mL/min/1.73 m²",
+  whoopUnit: "mL/min/1.73m2",
+  convert: v => v
+},
+
+{
+  whoop: "ESTRADIOL",
+  key: "estradiol",
+  type: "direct",
+  hhName: "Estradiol (E2)",
+  hhUnit: "pg/mL",
+  whoopUnit: "pg/mL",
+  convert: v => v
+},
+
+{
+  whoop: "FERRITIN",
+  key: "ferritin",
+  type: "direct",
+  hhName: "Ferritin",
+  hhUnit: "ng/mL",
+  whoopUnit: "ng/mL",
+  convert: v => v
+},
+
+{
+  whoop: "FOLLICLE STIMULATING HORMONE (FSH)",
+  key: "fsh",
+  type: "direct",
+  hhName: "FSH",
+  hhUnit: "mUI/mL",
+  whoopUnit: "mIU/mL",
+  convert: v => v
+},
+
+{
+  whoop: "GLOBULIN",
+  key: "globulin",
+  type: "direct",
+  hhName: "Globulin",
+  hhUnit: "g/dL",
+  whoopUnit: "g/dL",
+  convert: v => v
+},
+
+{
+  whoop: "GLUCOSE",
+  key: "glucose_mgdl",
+  type: "direct",
+  hhName: "Glucose (mg/dL)",
+  hhUnit: "mg/dL",
+  whoopUnit: "mg/dL",
+  convert: v => v
+},
+
+{
+  whoop: "HEMATOCRIT",
+  key: "hct",
+  type: "direct",
+  hhName: "Hct",
+  hhUnit: "%",
+  whoopUnit: "%",
+  convert: v => v
+},
+
+{
+  whoop: "HEMOGLOBIN",
+  key: "hgb",
+  type: "direct",
+  hhName: "Hb",
+  hhUnit: "g/dL",
+  whoopUnit: "g/dL",
+  convert: v => v
+},
+
+{
+  whoop: "HEMOGLOBIN A1C (HBA1C)",
+  key: "hba1c",
+  type: "direct",
+  hhName: "HbA1c (NGSP)",
+  hhUnit: "%A1c",
+  whoopUnit: "%",
+  convert: v => v
+},
+
+{
+  whoop: "HIGH-SENSITIVITY C-REACTIVE PROTEIN (HS-CRP)",
+  key: "hscrp",
+  type: "direct",
+  hhName: "hs CRP",
+  hhUnit: "mg/L",
+  whoopUnit: "mg/L",
+  convert: v => v
+},
+
+{
+  whoop: "HOMOCYSTEINE",
+  key: "homocysteine",
+  type: "direct",
+  hhName: "Homocysteine Total",
+  hhUnit: "µmol/L",
+  whoopUnit: "µmol/L",
+  convert: v => v
+},
+
+{
+  whoop: "INSULIN",
+  key: "insulin",
+  type: "direct",
+  hhName: "Insulin (Fasting)",
+  hhUnit: "µU/mL",
+  whoopUnit: "µU/mL",
+  convert: v => v
+},
+
+{
+  whoop: "IRON",
+  key: "iron_mcgdl",
+  type: "direct",
+  hhName: "Iron (Sắt/HT)2",
+  hhUnit: "µg/dL",
+  whoopUnit: "mcg/dL",
+  convert: v => v
+},
+
+{
+  whoop: "IRON % SATURATION",
+  key: "iron_sat",
+  type: "direct",
+  hhName: "Transferrin Saturation",
+  hhUnit: "%",
+  whoopUnit: "%",
+  convert: v => v
+},
+
+{
+  whoop: "LIPOPROTEIN (A)",
+  key: "lpa",
+  type: "direct",
+  hhName: "Lipoprotein (a) (nmol/L)",
+  hhUnit: "nmol/L",
+  whoopUnit: "nmol/L",
+  convert: v => v
+},
+
+{
+  whoop: "LUTEINIZING HORMONE (LH)",
+  key: "lh",
+  type: "direct",
+  hhName: "LH",
+  hhUnit: "mUI/mL",
+  whoopUnit: "mIU/mL",
+  convert: v => v
+},
+
+{
+  whoop: "LYMPHOCYTE %",
+  key: "lym_pct",
+  type: "direct",
+  hhName: "% Lym",
+  hhUnit: "%",
+  whoopUnit: "%",
+  convert: v => v
+},
+
+{
+  whoop: "MEAN CORPUSCULAR HEMOGLOBIN (MCH)",
+  key: "mch",
+  type: "direct",
+  hhName: "MCH",
+  hhUnit: "pg",
+  whoopUnit: "pg",
+  convert: v => v
+},
+
+{
+  whoop: "MEAN CORPUSCULAR HEMOGLOBIN CONCENTRATION (MCHC)",
+  key: "mchc",
+  type: "direct",
+  hhName: "MCHC",
+  hhUnit: "g/dL",
+  whoopUnit: "g/dL",
+  convert: v => v
+},
+
+{
+  whoop: "MEAN CORPUSCULAR VOLUME (MCV)",
+  key: "mcv",
+  type: "direct",
+  hhName: "MCV",
+  hhUnit: "fL",
+  whoopUnit: "fL",
+  convert: v => v
+},
+
+{
+  whoop: "MEAN PLATELET VOLUME (MPV)",
+  key: "mpv",
+  type: "direct",
+  hhName: "MPV",
+  hhUnit: "fL",
+  whoopUnit: "fL",
+  convert: v => v
+},
+
+{
+  whoop: "MONOCYTE %",
+  key: "mono_pct",
+  type: "direct",
+  hhName: "% Mono",
+  hhUnit: "%",
+  whoopUnit: "%",
+  convert: v => v
+},
+
+{
+  whoop: "POTASSIUM",
+  key: "potassium",
+  type: "direct",
+  hhName: "K",
+  hhUnit: "mmol/L",
+  whoopUnit: "mmol/L",
+  convert: v => v
+},
+
+{
+  whoop: "RED BLOOD CELL COUNT (RBC)",
+  key: "rbc",
+  type: "direct",
+  hhName: "RBC",
+  hhUnit: "10^12/L",
+  whoopUnit: "Million/uL",
+  convert: v => v
+},
+
+{
+  whoop: "RED CELL DISTRIBUTION WIDTH (RDW)",
+  key: "rdw",
+  type: "direct",
+  hhName: "RDW",
+  hhUnit: "%",
+  whoopUnit: "%",
+  convert: v => v
+},
+
+{
+  whoop: "SEX HORMONE BINDING GLOBULIN (SHBG)",
+  key: "shbg",
+  type: "direct",
+  hhName: "SHBG (Roche)",
+  hhUnit: "nmol/L",
+  whoopUnit: "nmol/L",
+  convert: v => v
+},
+
+{
+  whoop: "SODIUM",
+  key: "sodium",
+  type: "direct",
+  hhName: "Na",
+  hhUnit: "mmol/L",
+  whoopUnit: "mmol/L",
+  convert: v => v
+},
+
+{
+  whoop: "TOTAL BILIRUBIN",
+  key: "bilirubin",
+  type: "direct",
+  hhName: "Bilirubin T",
+  hhUnit: "mg/dL",
+  whoopUnit: "mg/dL",
+  convert: v => v
+},
+
+{
+  whoop: "TOTAL PROTEIN",
+  key: "total_protein",
+  type: "direct",
+  hhName: "Protid, Total",
+  hhUnit: "g/dL",
+  whoopUnit: "g/dL",
+  convert: v => v
+},
+
+{
+  whoop: "VITAMIN D",
+  key: "vitamin_d",
+  type: "direct",
+  hhName: "Vitamin D Total ( 25-OH Vit D )",
+  hhUnit: "ng/mL",
+  whoopUnit: "ng/mL",
+  convert: v => v
+},
+
+{
+  whoop: "WHITE BLOOD CELLS (WBC)",
+  key: "wbc",
+  type: "direct",
+  hhName: "WBC",
+  hhUnit: "10^9/L",
+  whoopUnit: "Thousand/uL",
+  convert: v => v
+},
+
+/* ============================================================================
+   CONVERSIONS
+============================================================================ */
+
+{
+  whoop: "BASOPHILS",
+  key: "basophils",
+  type: "convert",
+  hhName: "# Baso",
+  hhUnit: "10^9/L",
+  whoopUnit: "cells/uL",
+  convert: v => v * 1000
+},
+
+{
+  whoop: "CALCIUM",
+  key: "calcium_mgdl",
+  type: "convert",
+  hhName: "Ca",
+  hhUnit: "mmol/L",
+  whoopUnit: "mg/dL",
+  convert: v => v * 4.008
+},
+
+{
+  whoop: "DHEA SULFATE",
+  key: "dhea",
+  type: "convert",
+  hhName: "DHEA.SO4",
+  hhUnit: "µg/mL",
+  whoopUnit: "mcg/dL",
+  convert: v => v * 100
+},
+
+{
+  whoop: "EOSINOPHILS",
+  key: "eosinophils",
+  type: "convert",
+  hhName: "# Eos",
+  hhUnit: "10^9/L",
+  whoopUnit: "cells/uL",
+  convert: v => v * 1000
+},
+
+{
+  whoop: "HDL CHOLESTEROL",
+  key: "hdl_mgdl",
+  type: "convert",
+  hhName: "HDL Cholesterol",
+  hhUnit: "mmol/L",
+  whoopUnit: "mg/dL",
+  convert: v => v * 38.67
+},
+
+{
+  whoop: "LDL CHOLESTEROL",
+  key: "ldl_mgdl",
+  type: "convert",
+  hhName: "LDL Cholesterol",
+  hhUnit: "mmol/L",
+  whoopUnit: "mg/dL",
+  convert: v => v * 38.67
+},
+
+{
+  whoop: "LYMPHOCYTES",
+  key: "lymphocytes",
+  type: "convert",
+  hhName: "# Lym",
+  hhUnit: "10^9/L",
+  whoopUnit: "cells/uL",
+  convert: v => v * 1000
+},
+
+{
+  whoop: "MONOCYTES",
+  key: "monocytes",
+  type: "convert",
+  hhName: "# Mono",
+  hhUnit: "10^9/L",
+  whoopUnit: "cells/uL",
+  convert: v => v * 1000
+},
+
+{
+  whoop: "NEUTROPHILS",
+  key: "neutrophils",
+  type: "convert",
+  hhName: "# Neu",
+  hhUnit: "10^9/L",
+  whoopUnit: "cells/uL",
+  convert: v => v * 1000
+},
+
+{
+  whoop: "PLATELETS",
+  key: "platelets",
+  type: "convert",
+  hhName: "PLT",
+  hhUnit: "10^9/L",
+  whoopUnit: "Thousand/uL",
+  convert: v => v // visually equivalent, WHOOP accepts this
+},
+
+{
+  whoop: "TESTOSTERONE",
+  key: "testosterone_ngdl",
+  type: "convert",
+  hhName: "Testosterone",
+  hhUnit: "nmol/L",
+  whoopUnit: "ng/dL",
+  convert: v => v * 28.842
+},
+
+{
+  whoop: "TOTAL CHOLESTEROL",
+  key: "total_chol_mgdl",
+  type: "convert",
+  hhName: "Cholesterol, Total",
+  hhUnit: "mmol/L",
+  whoopUnit: "mg/dL",
+  convert: v => v * 38.67
+},
+
+{
+  whoop: "TOTAL IRON-BINDING CAPACITY (TIBC)",
+  key: "tibc",
+  type: "convert",
+  hhName: "Transferrin",
+  hhUnit: "mg/dL",
+  whoopUnit: "mcg/dL",
+  convert: v => v * 1.25
+},
+
+{
+  whoop: "TRIGLYCERIDES",
+  key: "triglycerides_mgdl",
+  type: "convert",
+  hhName: "Triglycerides",
+  hhUnit: "mmol/L",
+  whoopUnit: "mg/dL",
+  convert: v => v * 88.57
+},
+
+/* ============================================================================
+   CALCULATED BIOMARKERS
+============================================================================ */
+
+{
+  whoop: "ALBUMIN/GLOBULIN RATIO",
+  key: "a_g_ratio",
+  type: "calculated",
+  whoopUnit: "",
+  inputs: {
+    albumin:  { hhName: "Albumin", unit: "g/dL" },
+    globulin: { hhName: "Globulin", unit: "g/dL" }
   },
+  inputRequirements: ["albumin","globulin"],
+  convert: ({ albumin, globulin }) =>
+      (albumin && globulin ? albumin / globulin : null)
+},
 
-  // 2 — Albumin
-  {
-    whoopName: "ALBUMIN",
-    hoaHaoName: "Albumin",
-    hoaHaoUnit: "g/dL",
-    whoopUnit: "g/dL",
-    type: "direct",
-    formulaJS: null,
-    explanation: "Giống đơn vị. Nhập y chang."
+{
+  whoop: "BUN/CREATININE RATIO",
+  key: "bun_creatinine_ratio",
+  type: "calculated",
+  whoopUnit: "",
+  inputs: {
+    bun:        { hhName: "BUN", unit: "mg/dL" },
+    creatinine: { hhName: "Creatinin/Serum", unit: "mg/dL" }
   },
+  inputRequirements: ["bun","creatinine"],
+  convert: ({ bun, creatinine }) =>
+      (bun && creatinine ? bun / creatinine : null)
+},
 
-  // 3 — Albumin / Globulin Ratio (Composite)
-  {
-    whoopName: "ALBUMIN/GLOBULIN RATIO",
-    type: "composite",
-    formulaInputs: ["Albumin", "Globulin"],
-    hoaHaoName: null,
-    hoaHaoUnit: null,
-    whoopUnit: null,
-    formulaJS: (alb, glo) => alb / glo,
-    explanation: "Hoà Hảo không có chỉ số này. WHOOP tự tạo bằng công thức: Albumin / Globulin."
+{
+  whoop: "CHOLESTEROL / HDL RATIO",
+  key: "chol_hdl_ratio",
+  type: "calculated",
+  whoopUnit: "",
+  inputs: {
+    total_chol_mgdl: { hhName: "Cholesterol, Total", unit: "mmol/L" },
+    hdl_mgdl:        { hhName: "HDL Cholesterol", unit: "mmol/L" }
   },
+  inputRequirements: ["total_chol_mgdl","hdl_mgdl"],
+  convert: ({ total_chol_mgdl, hdl_mgdl }) =>
+      (total_chol_mgdl && hdl_mgdl ? total_chol_mgdl / hdl_mgdl : null)
+},
 
-  // 4 — ALP
-  {
-    whoopName: "ALKALINE PHOSPHATASE (ALP)",
-    hoaHaoName: "Alk Phosphatase",
-    hoaHaoUnit: "U/L",
-    whoopUnit: "U/L",
-    type: "direct",
-    formulaJS: null,
-    explanation: "Giống đơn vị. Nhập thẳng."
+{
+  whoop: "FREE TESTOSTERONE",
+  key: "free_testosterone",
+  type: "calculated",
+  whoopUnit: "pg/mL",
+  inputs: {
+    albumin:           { hhName: "Albumin", unit: "g/dL" },
+    shbg:              { hhName: "SHBG (Roche)", unit: "nmol/L" },
+    testosterone_nmol: { hhName: "Testosterone", unit: "nmol/L" }
   },
-
-  // 5 — ApoB
-  {
-    whoopName: "APOLIPOPROTEIN B (APOB)",
-    hoaHaoName: "LIPOPROTEIN APO-B",
-    hoaHaoUnit: "mg/dL",
-    whoopUnit: "mg/dL",
-    type: "direct",
-    formulaJS: null,
-    explanation: "Giống đơn vị."
-  },
-
-  // 6 — AST
-  {
-    whoopName: "ASPARTATE AMINOTRANSFERASE (AST)",
-    hoaHaoName: "SGOT (AST)",
-    hoaHaoUnit: "U/L",
-    whoopUnit: "U/L",
-    type: "direct",
-    formulaJS: null,
-    explanation: "Giống đơn vị."
-  },
-
-  // 7 — BUN/Creatinine (Composite)
-  {
-    whoopName: "BUN/CREATININE RATIO",
-    type: "composite",
-    formulaInputs: ["BUN", "Creatinin/Serum"],
-    hoaHaoName: null,
-    hoaHaoUnit: null,
-    whoopUnit: null,
-    formulaJS: (bun, cre) => bun / cre,
-    explanation: "Hoà Hảo không có chỉ số này. WHOOP tạo bằng công thức: BUN / Creatinine."
-  },
-
-  // 8 — Basophil %
-  {
-    whoopName: "BASOPHIL %",
-    hoaHaoName: "% Baso",
-    hoaHaoUnit: "%",
-    whoopUnit: "%",
-    type: "direct",
-    formulaJS: null,
-    explanation: "Giống đơn vị."
-  },
-
-  // 9 — Basophils (#)
-  {
-    whoopName: "BASOPHILS",
-    hoaHaoName: "# Baso",
-    hoaHaoUnit: "10^9/L",
-    whoopUnit: "cells/uL",
-    type: "conversion",
-    formulaJS: (v) => v * 1000,
-    explanation: "Hoà Hảo dùng 10⁹/L, WHOOP dùng cells/uL. 1 ×10⁹/L = 1000 cells/uL."
-  },
-
-  // 10 — BUN
-  {
-    whoopName: "BLOOD UREA NITROGEN",
-    hoaHaoName: "BUN",
-    hoaHaoUnit: "mg/dL",
-    whoopUnit: "mg/dL",
-    type: "direct",
-    formulaJS: null,
-    explanation: "Giống đơn vị."
-  },
-
-  // 11 — Calcium (convert mmol/L → mg/dL)
-  {
-    whoopName: "CALCIUM",
-    hoaHaoName: "Ca",
-    hoaHaoUnit: "mmol/L",
-    whoopUnit: "mg/dL",
-    type: "conversion",
-    formulaJS: (v) => v * 4.008,
-    explanation: "Hoà Hảo mmol/L, WHOOP mg/dL. Nhân 4.008."
-  },
-
-  // 12 — Chloride
-  {
-    whoopName: "CHLORIDE",
-    hoaHaoName: "Cl",
-    hoaHaoUnit: "mmol/L",
-    whoopUnit: "mmol/L",
-    type: "direct",
-    formulaJS: null,
-    explanation: "Giống đơn vị."
-  },
-
-  // 13 — Cholesterol / HDL (Composite)
-  {
-    whoopName: "CHOLESTEROL / HDL RATIO",
-    type: "composite",
-    formulaInputs: ["Cholesterol, Total", "HDL Cholesterol"],
-    formulaJS: (total, hdl) => total / hdl,
-    explanation: "Hoà Hảo không có chỉ số này. WHOOP tạo bằng công thức Total Cholesterol / HDL."
-  },
-
-  // 14 — Cortisol (Blood Morning)
-  {
-    whoopName: "CORTISOL",
-    hoaHaoName: "Cortisol/Blood/Morning (μg/dL)",
-    hoaHaoUnit: "μg/dL",
-    whoopUnit: "μg/dL",
-    type: "direct",
-    formulaJS: null,
-    explanation: "Giống đơn vị."
-  },
-
-  // 15 — Creatinine
-  {
-    whoopName: "CREATININE",
-    hoaHaoName: "Creatinin/Serum",
-    hoaHaoUnit: "mg/dL",
-    whoopUnit: "mg/dL",
-    type: "direct",
-    formulaJS: null,
-    explanation: "Giống đơn vị."
-  }
-
-];
-// --- continuing the array ---
-export const biomarkers = [
-
-  // … PART 1 items (1–15) above …
-
-  // 16 — DHEA-Sulfate (unit conversion)
-  {
-    whoopName: "DHEA SULFATE",
-    hoaHaoName: "DHEA.SO4",
-    hoaHaoUnit: "µg/mL",
-    whoopUnit: "mcg/dL",
-    type: "conversion",
-    formulaJS: (v) => v * 100,        // µg/mL → mcg/dL
-    explanation: "Hoà Hảo dùng µg/mL. WHOOP dùng mcg/dL. Nhân 100."
-  },
-
-  // 17 — Eosinophil %
-  {
-    whoopName: "EOSINOPHIL %",
-    hoaHaoName: "% Eos",
-    hoaHaoUnit: "%",
-    whoopUnit: "%",
-    type: "direct",
-    formulaJS: null,
-    explanation: "Giống đơn vị."
-  },
-
-  // 18 — Eosinophils (#)
-  {
-    whoopName: "EOSINOPHILS",
-    hoaHaoName: "# Eos",
-    hoaHaoUnit: "10^9/L",
-    whoopUnit: "cells/uL",
-    type: "conversion",
-    formulaJS: (v) => v * 1000,
-    explanation: "1 ×10⁹/L = 1000 cells/uL."
-  },
-
-  // 19 — eGFR
-  {
-    whoopName: "ESTIMATED GLOMERULAR FILTRATION RATE (EGFR)",
-    hoaHaoName: "eGFR (CKD-EPI)",
-    hoaHaoUnit: "mL/min/1.73 m²",
-    whoopUnit: "mL/min/1.73 m²",
-    type: "direct",
-    formulaJS: null,
-    explanation: "Giống đơn vị."
-  },
-
-  // 20 — Estradiol
-  {
-    whoopName: "ESTRADIOL",
-    hoaHaoName: "Estradiol (E2)",
-    hoaHaoUnit: "pg/mL",
-    whoopUnit: "pg/mL",
-    type: "direct",
-    formulaJS: null,
-    explanation: "Giống đơn vị."
-  },
-
-  // 21 — Ferritin
-  {
-    whoopName: "FERRITIN",
-    hoaHaoName: "Ferritin",
-    hoaHaoUnit: "ng/mL",
-    whoopUnit: "ng/mL",
-    type: "direct",
-    formulaJS: null,
-    explanation: "Giống đơn vị."
-  },
-
-  // 22 — FSH
-  {
-    whoopName: "FOLLICLE STIMULATING HORMONE (FSH)",
-    hoaHaoName: "FSH",
-    hoaHaoUnit: "mUI/mL",
-    whoopUnit: "mIU/mL",
-    type: "direct",
-    formulaJS: null,
-    explanation: "Cùng đơn vị, chỉ khác cách viết."
-  },
-
-  // 23 — Free Testosterone (complex)
-  {
-    whoopName: "FREE TESTOSTERONE",
-    type: "composite",
-    formulaInputs: ["Albumin", "SHBG (Roche)", "Testosterone"],
-    whoopUnit: "pg/mL",
-    formulaJS: (AlbGD, ShbgN, TotalTN) => {
+  inputRequirements: ["albumin","shbg","testosterone_nmol"],
+  convert: ({ albumin, shbg, testosterone_nmol }) => {
+      if (!albumin || !shbg || !testosterone_nmol) return null;
+      const AlbGD = albumin;
+      const ShbgN = shbg;
+      const TotalTN = testosterone_nmol;
       const KaA = 36000;
-      const KsS = 1_000_000_000;
+      const KsS = 1000000000;
       const MW = 288.42;
       const AlbGL = AlbGD * 10;
       const AlbMol = AlbGL / 69000;
@@ -265,494 +648,54 @@ export const biomarkers = [
       const aa = KsS * (AlbMol * KaA + 1);
       const bb = AlbMol * KaA + KsS * ShbgMol - KsS * TTmol + 1;
       const cc = -TTmol;
-      const FTmol = (-bb + Math.sqrt(bb * bb - 4 * aa * cc)) / (2 * aa);
+      const FTmol = (-bb + Math.sqrt(bb ** 2 - 4 * aa * cc)) / (2 * aa);
       return FTmol * MW * 1e9;
-    },
-    explanation: "Hoà Hảo không có Free Testosterone. Tính bằng công thức chuẩn Vermeulen."
-  },
-
-  // 24 — Globulin
-  {
-    whoopName: "GLOBULIN",
-    hoaHaoName: "Globulin",
-    hoaHaoUnit: "g/dL",
-    whoopUnit: "g/dL",
-    type: "direct",
-    formulaJS: null,
-    explanation: "Giống đơn vị."
-  },
-
-  // 25 — Glucose (mg/dL)
-  {
-    whoopName: "GLUCOSE",
-    hoaHaoName: "Glucose (mg/dL)",
-    hoaHaoUnit: "mg/dL",
-    whoopUnit: "mg/dL",
-    type: "direct",
-    formulaJS: null,
-    explanation: "Giống đơn vị."
-  },
-
-  // 26 — HOMA-IR (Composite)
-  {
-    whoopName: "HOMA-IR SCORE",
-    type: "composite",
-    formulaInputs: ["Insulin (Fasting)", "Glucose (mg/dL)"],
-    formulaJS: (insulin, glucose) => (insulin * glucose) / 405,
-    explanation: "Hoà Hảo không có. Dùng công thức: (Glucose mg/dL * Insulin) / 405."
-  },
-
-  // 27 — HDL-C (convert mmol/L → mg/dL)
-  {
-    whoopName: "HDL CHOLESTEROL",
-    hoaHaoName: "HDL Cholesterol",
-    hoaHaoUnit: "mmol/L",
-    whoopUnit: "mg/dL",
-    type: "conversion",
-    formulaJS: (v) => v * 38.67,
-    explanation: "Nhân 38.67 để đổi mmol/L → mg/dL."
-  },
-
-  // 28 — Hematocrit
-  {
-    whoopName: "HEMATOCRIT",
-    hoaHaoName: "Hct",
-    hoaHaoUnit: "%",
-    whoopUnit: "%",
-    type: "direct",
-    formulaJS: null,
-    explanation: "Giống đơn vị."
-  },
-
-  // 29 — Hemoglobin
-  {
-    whoopName: "HEMOGLOBIN",
-    hoaHaoName: "Hb",
-    hoaHaoUnit: "g/dL",
-    whoopUnit: "g/dL",
-    type: "direct",
-    formulaJS: null,
-    explanation: "Giống đơn vị."
-  },
-
-  // 30 — HbA1c NGSP version
-  {
-    whoopName: "HEMOGLOBIN A1C (HBA1C)",
-    hoaHaoName: "HbA1c (NGSP)",
-    hoaHaoUnit: "%A1c",
-    whoopUnit: "%",
-    type: "direct",
-    formulaJS: null,
-    explanation: "Dùng giá trị NGSP (%.). Không dùng IFCC mmol/mol."
   }
+},
+
+{
+  whoop: "HOMA-IR SCORE",
+  key: "homa_ir",
+  type: "calculated",
+  whoopUnit: "",
+  inputs: {
+    glucose_mgdl: { hhName: "Glucose (mg/dL)", unit: "mg/dL" },
+    insulin:      { hhName: "Insulin (Fasting)", unit: "µU/mL" }
+  },
+  inputRequirements: ["glucose_mgdl","insulin"],
+  convert: ({ glucose_mgdl, insulin }) =>
+      (glucose_mgdl && insulin ? (glucose_mgdl * insulin) / 405 : null)
+},
+
+{
+  whoop: "NON-HDL CHOLESTEROL",
+  key: "non_hdl",
+  type: "calculated",
+  whoopUnit: "mg/dL",
+  inputs: {
+    total_chol_mgdl: { hhName: "Cholesterol, Total", unit: "mmol/L" },
+    hdl_mgdl:        { hhName: "HDL Cholesterol", unit: "mmol/L" }
+  },
+  inputRequirements: ["total_chol_mgdl","hdl_mgdl"],
+  convert: ({ total_chol_mgdl, hdl_mgdl }) => {
+    if (total_chol_mgdl == null || hdl_mgdl == null) return null;
+    const diff = total_chol_mgdl - hdl_mgdl;     // mmol/L
+    return diff * 38.67;                         // convert to mg/dL
+  }
+},
+
+/* ============================================================================
+   MISSING
+============================================================================ */
+
+{
+  whoop: "CARBON DIOXIDE",
+  key: "co2",
+  type: "missing",
+  hhName: "",
+  hhUnit: "",
+  whoopUnit: "",
+  convert: () => null
+}
 
 ];
-// continuing biomarkers array…
-
-export const biomarkers = [
-
-  // … part 1 + part 2 items above …
-
-  // 31 — hsCRP
-  {
-    whoopName: "HIGH-SENSITIVITY C-REACTIVE PROTEIN (HS-CRP)",
-    hoaHaoName: "hs CRP",
-    hoaHaoUnit: "mg/L",
-    whoopUnit: "mg/L",
-    type: "direct",
-    formulaJS: null,
-    explanation: "Giống đơn vị."
-  },
-
-  // 32 — Homocysteine
-  {
-    whoopName: "HOMOCYSTEINE",
-    hoaHaoName: "Homocysteine Total",
-    hoaHaoUnit: "µmol/L",
-    whoopUnit: "µmol/L",
-    type: "direct",
-    formulaJS: null,
-    explanation: "Giống đơn vị."
-  },
-
-  // 33 — Insulin
-  {
-    whoopName: "INSULIN",
-    hoaHaoName: "Insulin (Fasting)",
-    hoaHaoUnit: "µU/mL",
-    whoopUnit: "µU/mL",
-    type: "direct",
-    formulaJS: null,
-    explanation: "Giống đơn vị (chỉ khác viết ulU/mL vs µU/mL)."
-  },
-
-  // 34 — Iron
-  {
-    whoopName: "IRON",
-    hoaHaoName: "Iron (Sắt/HT)2",
-    hoaHaoUnit: "µg/dL",
-    whoopUnit: "mcg/dL",
-    type: "direct",
-    formulaJS: null,
-    explanation: "Cùng đơn vị (µg/dL = mcg/dL)."
-  },
-
-  // 35 — Iron % Saturation
-  {
-    whoopName: "IRON % SATURATION",
-    hoaHaoName: "Transferrin Saturation",
-    hoaHaoUnit: "%",
-    whoopUnit: "%",
-    type: "direct",
-    formulaJS: null,
-    explanation: "Giống đơn vị."
-  },
-
-  // 36 — LDL-C (mmol/L → mg/dL)
-  {
-    whoopName: "LDL CHOLESTEROL",
-    hoaHaoName: "LDL Cholesterol",
-    hoaHaoUnit: "mmol/L",
-    whoopUnit: "mg/dL",
-    type: "conversion",
-    formulaJS: (v) => v * 38.67,
-    explanation: "Đổi mmol/L → mg/dL bằng cách nhân 38.67."
-  },
-
-  // 37 — Lipoprotein(a) nmol/L
-  {
-    whoopName: "LIPOPROTEIN (A)",
-    hoaHaoName: "Lipoprotein (a) (nmol/L)",
-    hoaHaoUnit: "nmol/L",
-    whoopUnit: "nmol/L",
-    type: "direct",
-    formulaJS: null,
-    explanation: "Giống đơn vị."
-  },
-
-  // 38 — LH
-  {
-    whoopName: "LUTEINIZING HORMONE (LH)",
-    hoaHaoName: "LH",
-    hoaHaoUnit: "mUI/mL",
-    whoopUnit: "mIU/mL",
-    type: "direct",
-    formulaJS: null,
-    explanation: "Cùng đơn vị (mIU/mL)."
-  },
-
-  // 39 — Lymphocyte %
-  {
-    whoopName: "LYMPHOCYTE %",
-    hoaHaoName: "% Lym",
-    hoaHaoUnit: "%",
-    whoopUnit: "%",
-    type: "direct",
-    formulaJS: null,
-    explanation: "Giống đơn vị."
-  },
-
-  // 40 — Lymphocytes (#)
-  {
-    whoopName: "LYMPHOCYTES",
-    hoaHaoName: "# Lym",
-    hoaHaoUnit: "10^9/L",
-    whoopUnit: "cells/uL",
-    type: "conversion",
-    formulaJS: (v) => v * 1000,
-    explanation: "1 ×10⁹/L = 1000 cells/uL."
-  },
-
-  // 41 — MCH
-  {
-    whoopName: "MEAN CORPUSCULAR HEMOGLOBIN (MCH)",
-    hoaHaoName: "MCH",
-    hoaHaoUnit: "pg",
-    whoopUnit: "pg",
-    type: "direct",
-    formulaJS: null,
-    explanation: "Giống đơn vị."
-  },
-
-  // 42 — MCHC
-  {
-    whoopName: "MEAN CORPUSCULAR HEMOGLOBIN CONCENTRATION (MCHC)",
-    hoaHaoName: "MCHC",
-    hoaHaoUnit: "g/dL",
-    whoopUnit: "g/dL",
-    type: "direct",
-    formulaJS: null,
-    explanation: "Giống đơn vị."
-  },
-
-  // 43 — MCV
-  {
-    whoopName: "MEAN CORPUSCULAR VOLUME (MCV)",
-    hoaHaoName: "MCV",
-    hoaHaoUnit: "fL",
-    whoopUnit: "fL",
-    type: "direct",
-    formulaJS: null,
-    explanation: "Giống đơn vị."
-  },
-
-  // 44 — MPV
-  {
-    whoopName: "MEAN PLATELET VOLUME (MPV)",
-    hoaHaoName: "MPV",
-    hoaHaoUnit: "fL",
-    whoopUnit: "fL",
-    type: "direct",
-    formulaJS: null,
-    explanation: "Giống đơn vị."
-  },
-
-  // 45 — Monocyte %
-  {
-    whoopName: "MONOCYTE %",
-    hoaHaoName: "% Mono",
-    hoaHaoUnit: "%",
-    whoopUnit: "%",
-    type: "direct",
-    formulaJS: null,
-    explanation: "Giống đơn vị."
-  }
-
-];
-// continuing biomarkers array…
-
-export const biomarkers = [
-
-  // … part 1 + part 2 + part 3 items above …
-
-  // 46 — Monocytes (#)
-  {
-    whoopName: "MONOCYTES",
-    hoaHaoName: "# Mono",
-    hoaHaoUnit: "10^9/L",
-    whoopUnit: "cells/uL",
-    type: "conversion",
-    formulaJS: (v) => v * 1000,
-    explanation: "1 ×10⁹/L = 1000 cells/uL."
-  },
-
-  // 47 — Neutrophil %
-  {
-    whoopName: "NEUTROPHIL %",
-    hoaHaoName: "% Neu",
-    hoaHaoUnit: "%",
-    whoopUnit: "%",
-    type: "direct",
-    formulaJS: null,
-    explanation: "Giống đơn vị."
-  },
-
-  // 48 — Neutrophils (#)
-  {
-    whoopName: "NEUTROPHILS",
-    hoaHaoName: "# Neu",
-    hoaHaoUnit: "10^9/L",
-    whoopUnit: "cells/uL",
-    type: "conversion",
-    formulaJS: (v) => v * 1000,
-    explanation: "1 ×10⁹/L = 1000 cells/uL."
-  },
-
-  // 49 — Non-HDL Cholesterol (Total – HDL)
-  {
-    whoopName: "NON-HDL CHOLESTEROL",
-    hoaHaoName: null,
-    hoaHaoUnit: null,
-    whoopUnit: "mg/dL",
-    type: "composite",
-    formulaInputs: ["TOTAL CHOLESTEROL", "HDL CHOLESTEROL"],
-    formulaJS: (total, hdl) => total - hdl,
-    explanation: "WHOOP không hiển thị trực tiếp. Công thức: Total Cholesterol (mg/dL) – HDL (mg/dL)."
-  },
-
-  // 50 — Platelets
-  {
-    whoopName: "PLATELETS",
-    hoaHaoName: "PLT",
-    hoaHaoUnit: "10^9/L",
-    whoopUnit: "Thousand/uL",
-    type: "conversion",
-    formulaJS: (v) => v, // same ratio, different display
-    explanation: "10^9/L và Thousand/uL bản chất bằng nhau. WHOOP chỉ đổi cách viết."
-  },
-
-  // 51 — Potassium
-  {
-    whoopName: "POTASSIUM",
-    hoaHaoName: "K",
-    hoaHaoUnit: "mmol/L",
-    whoopUnit: "mmol/L",
-    type: "direct",
-    formulaJS: null,
-    explanation: "Giống đơn vị."
-  },
-
-  // 52 — RBC
-  {
-    whoopName: "RED BLOOD CELL COUNT (RBC)",
-    hoaHaoName: "RBC",
-    hoaHaoUnit: "10^12/L",
-    whoopUnit: "Million/uL",
-    type: "conversion",
-    formulaJS: (v) => v, 
-    explanation: "10^12/L tương đương Million/uL (cùng giá trị)."
-  },
-
-  // 53 — RDW
-  {
-    whoopName: "RED CELL DISTRIBUTION WIDTH (RDW)",
-    hoaHaoName: "RDW",
-    hoaHaoUnit: "%",
-    whoopUnit: "%",
-    type: "direct",
-    formulaJS: null,
-    explanation: "Giống đơn vị."
-  },
-
-  // 54 — SHBG
-  {
-    whoopName: "SEX HORMONE BINDING GLOBULIN (SHBG)",
-    hoaHaoName: "SHBG (Roche)",
-    hoaHaoUnit: "nmol/L",
-    whoopUnit: "nmol/L",
-    type: "direct",
-    formulaJS: null,
-    explanation: "Giống đơn vị."
-  },
-
-  // 55 — Sodium
-  {
-    whoopName: "SODIUM",
-    hoaHaoName: "Na",
-    hoaHaoUnit: "mmol/L",
-    whoopUnit: "mmol/L",
-    type: "direct",
-    formulaJS: null,
-    explanation: "Giống đơn vị."
-  },
-
-  // 56 — Testosterone (nmol/L → ng/dL)
-  {
-    whoopName: "TESTOSTERONE",
-    hoaHaoName: "Testosterone",
-    hoaHaoUnit: "nmol/L",
-    whoopUnit: "ng/dL",
-    type: "conversion",
-    formulaJS: (v) => v * 28.842,
-    explanation: "Đổi nmol/L → ng/dL nhân 28.842."
-  },
-
-  // 57 — TSH
-  {
-    whoopName: "THYROID-STIMULATING HORMONE (TSH)",
-    hoaHaoName: "TSH u.sensitive (3rd G)",
-    hoaHaoUnit: "µIU/mL",
-    whoopUnit: "mIU/L",
-    type: "direct",
-    formulaJS: null,
-    explanation: "mgIU/L và µIU/mL tương đương, chỉ khác cách viết (đổi 1:1)."
-  },
-
-  // 58 — Total Bilirubin
-  {
-    whoopName: "TOTAL BILIRUBIN",
-    hoaHaoName: "Bilirubin T",
-    hoaHaoUnit: "mg/dL",
-    whoopUnit: "mg/dL",
-    type: "direct",
-    formulaJS: null,
-    explanation: "Giống đơn vị."
-  }
-
-];
-// continuing biomarkers array…
-
-export const biomarkers = [
-
-  // … part 1 + part 2 + part 3 + part 4 items above …
-
-  // 59 — Total Cholesterol (mmol/L → mg/dL)
-  {
-    whoopName: "TOTAL CHOLESTEROL",
-    hoaHaoName: "Cholesterol, Total",
-    hoaHaoUnit: "mmol/L",
-    whoopUnit: "mg/dL",
-    type: "conversion",
-    formulaJS: (v) => v * 38.67,
-    explanation: "mmol/L → mg/dL nhân 38.67."
-  },
-
-  // 60 — Total Iron Binding Capacity (TIBC)
-  {
-    whoopName: "TOTAL IRON-BINDING CAPACITY (TIBC)",
-    hoaHaoName: "Transferrin",
-    hoaHaoUnit: "mg/dL",
-    whoopUnit: "mcg/dL",
-    type: "conversion",
-    formulaJS: (v) => v * 1.25,
-    explanation: "Hoà Hảo không có TIBC. Tính bằng: TIBC = Transferrin × 1.25."
-  },
-
-  // 61 — Total Protein
-  {
-    whoopName: "TOTAL PROTEIN",
-    hoaHaoName: "Protid, Total",
-    hoaHaoUnit: "g/dL",
-    whoopUnit: "g/dL",
-    type: "direct",
-    formulaJS: null,
-    explanation: "Giống đơn vị."
-  },
-
-  // 62 — Triglycerides (mmol/L → mg/dL)
-  {
-    whoopName: "TRIGLYCERIDES",
-    hoaHaoName: "Triglycerides",
-    hoaHaoUnit: "mmol/L",
-    whoopUnit: "mg/dL",
-    type: "conversion",
-    formulaJS: (v) => v * 88.57,
-    explanation: "mmol/L → mg/dL nhân 88.57."
-  },
-
-  // 63 — Vitamin D
-  {
-    whoopName: "VITAMIN D",
-    hoaHaoName: "Vitamin D Total ( 25-OH Vit D )",
-    hoaHaoUnit: "ng/mL",
-    whoopUnit: "ng/mL",
-    type: "direct",
-    formulaJS: null,
-    explanation: "Giống đơn vị."
-  },
-
-  // 64 — White Blood Cells (WBC)
-  {
-    whoopName: "WHITE BLOOD CELLS (WBC)",
-    hoaHaoName: "WBC",
-    hoaHaoUnit: "10^9/L",
-    whoopUnit: "Thousand/uL",
-    type: "conversion",
-    formulaJS: (v) => v, 
-    explanation: "10^9/L tương đương Thousand/uL."
-  },
-
-  // 65 — Carbon Dioxide (Not measured by Hoà Hảo)
-  {
-    whoopName: "CARBON DIOXIDE",
-    hoaHaoName: null,
-    hoaHaoUnit: null,
-    whoopUnit: null,
-    type: "missing",
-    formulaJS: null,
-    explanation: "Hoà Hảo không có chỉ số CO₂."
-  }
-
-];
-
-// end of file
