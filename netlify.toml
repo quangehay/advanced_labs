@@ -1,0 +1,4 @@
+[[redirects]]
+  from = "/advanced_labs/*"
+  to   = "/advanced_labs/index.html"
+  status = 200
