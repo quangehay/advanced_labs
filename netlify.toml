@@ -1,4 +1,8 @@
+[build]
+command = ""
+publish = "advanced_labs"
+
 [[redirects]]
-  from = "/advanced_labs/*"
-  to   = "/advanced_labs/index.html"
-  status = 200
+from = "/advanced_labs/*"
+to = "/advanced_labs/index.html"
+status = 200
